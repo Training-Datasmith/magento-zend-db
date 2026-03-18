@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,18 +22,15 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Abstract
  */
 #require_once 'Zend/Db/Adapter/Abstract.php';
 
-
 /**
  * @see Zend_Db_Statement_Pdo
  */
 #require_once 'Zend/Db/Statement/Pdo.php';
-
 
 /**
  * Class for connecting to SQL databases and performing common operations using PDO.
@@ -321,7 +320,8 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
     /**
      * Roll-back a transaction.
      */
-    protected function _rollBack() {
+    protected function _rollBack()
+    {
         $this->_connect();
         $this->_connection->rollBack();
     }

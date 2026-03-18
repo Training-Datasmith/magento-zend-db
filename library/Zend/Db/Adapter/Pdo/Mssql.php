@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 
 /**
  * Class for connecting to Microsoft SQL Server databases and performing common operations.
@@ -69,7 +69,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         'MONEY'              => Zend_Db::FLOAT_TYPE,
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE,
-        'SMALLMONEY'         => Zend_Db::FLOAT_TYPE
+        'SMALLMONEY'         => Zend_Db::FLOAT_TYPE,
     ];
 
     /**
@@ -166,7 +166,8 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * It is necessary to override the abstract PDO transaction functions here, as
      * the PDO driver for MSSQL does not support transactions.
      */
-    protected function _rollBack(): bool {
+    protected function _rollBack(): bool
+    {
         $this->_connect();
         $this->_connection->exec('ROLLBACK TRANSACTION');
         return true;
@@ -224,9 +225,9 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         /**
          * Discover metadata information about this table.
          */
-        $sql = "exec sp_columns @table_name = " . $this->quoteIdentifier($tableName, true);
+        $sql = 'exec sp_columns @table_name = ' . $this->quoteIdentifier($tableName, true);
         if ($schemaName != null) {
-            $sql .= ", @table_owner = " . $this->quoteIdentifier($schemaName, true);
+            $sql .= ', @table_owner = ' . $this->quoteIdentifier($schemaName, true);
         }
 
         $stmt = $this->query($sql);
@@ -245,9 +246,9 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         /**
          * Discover primary key column(s) for this table.
          */
-        $sql = "exec sp_pkeys @table_name = " . $this->quoteIdentifier($tableName, true);
+        $sql = 'exec sp_pkeys @table_name = ' . $this->quoteIdentifier($tableName, true);
         if ($schemaName != null) {
-            $sql .= ", @table_owner = " . $this->quoteIdentifier($schemaName, true);
+            $sql .= ', @table_owner = ' . $this->quoteIdentifier($schemaName, true);
         }
 
         $stmt = $this->query($sql);
@@ -291,7 +292,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 'UNSIGNED'         => null, // @todo
                 'PRIMARY'          => $isPrimary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
         }
         return $desc;
@@ -308,8 +309,8 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * @throws Zend_Db_Adapter_Exception
      * @return string
      */
-     public function limit($sql, $count, $offset = 0)
-     {
+    public function limit($sql, $count, $offset = 0)
+    {
         $count = intval($count);
         if ($count <= 0) {
             /** @see Zend_Db_Adapter_Exception */
@@ -326,9 +327,9 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
 
         $sql = preg_replace(
             '/^SELECT\s+(DISTINCT\s)?/i',
-            'SELECT $1TOP ' . ($count+$offset) . ' ',
+            'SELECT $1TOP ' . ($count + $offset) . ' ',
             $sql
-            );
+        );
 
         if ($offset > 0) {
             $orderby = stristr($sql, 'ORDER BY');
@@ -354,9 +355,6 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
 
                 $orderbyInverse = 'ORDER BY ' . implode(', ', $orderbyInverseParts);
             }
-
-
-
 
             $sql = 'SELECT * FROM (SELECT TOP ' . $count . ' * FROM (' . $sql . ') AS inner_tbl';
             if ($orderby !== false) {

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Statement
  */
 #require_once 'Zend/Db/Statement.php';
-
 
 /**
  * Extends for Mysqli
@@ -38,7 +38,6 @@
  */
 class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
 {
-
     /**
      * Column names.
      *
@@ -74,7 +73,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
              * @see Zend_Db_Statement_Mysqli_Exception
              */
             #require_once 'Zend/Db/Statement/Mysqli/Exception.php';
-            throw new Zend_Db_Statement_Mysqli_Exception("Mysqli prepare error: " . $mysqli->error, $mysqli->errno);
+            throw new Zend_Db_Statement_Mysqli_Exception('Mysqli prepare error: ' . $mysqli->error, $mysqli->errno);
         }
     }
 
@@ -200,7 +199,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
             call_user_func_array(
                 [$this->_stmt, 'bind_param'],
                 $stmtParams
-                );
+            );
         }
 
         // execute the statement
@@ -210,9 +209,8 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
              * @see Zend_Db_Statement_Mysqli_Exception
              */
             #require_once 'Zend/Db/Statement/Mysqli/Exception.php';
-            throw new Zend_Db_Statement_Mysqli_Exception("Mysqli statement execute error : " . $this->_stmt->error, $this->_stmt->errno);
+            throw new Zend_Db_Statement_Mysqli_Exception('Mysqli statement execute error : ' . $this->_stmt->error, $this->_stmt->errno);
         }
-
 
         // retain metadata
         if ($this->_meta === null) {
@@ -222,7 +220,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
                  * @see Zend_Db_Statement_Mysqli_Exception
                  */
                 #require_once 'Zend/Db/Statement/Mysqli/Exception.php';
-                throw new Zend_Db_Statement_Mysqli_Exception("Mysqli statement metadata error: " . $this->_stmt->error, $this->_stmt->errno);
+                throw new Zend_Db_Statement_Mysqli_Exception('Mysqli statement metadata error: ' . $this->_stmt->error, $this->_stmt->errno);
             }
         }
 
@@ -255,7 +253,6 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         }
         return $retval;
     }
-
 
     /**
      * Fetches a row from the result set.

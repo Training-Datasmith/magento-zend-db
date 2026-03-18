@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 
 /**
  * Class for connecting to Oracle databases and performing common operations.
@@ -38,7 +38,6 @@
  */
 class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
 {
-
     /**
      * PDO type.
      *
@@ -70,7 +69,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
         'BINARY_DOUBLE'      => Zend_Db::FLOAT_TYPE,
         'BINARY_FLOAT'       => Zend_Db::FLOAT_TYPE,
-        'NUMBER'             => Zend_Db::FLOAT_TYPE
+        'NUMBER'             => Zend_Db::FLOAT_TYPE,
     ];
 
     /**
@@ -192,7 +191,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
             }
             $sql .= ' ORDER BY TC.COLUMN_ID';
         } else {
-            $subSql="SELECT AC.OWNER, AC.TABLE_NAME, ACC.COLUMN_NAME, AC.CONSTRAINT_TYPE, ACC.POSITION
+            $subSql = "SELECT AC.OWNER, AC.TABLE_NAME, ACC.COLUMN_NAME, AC.CONSTRAINT_TYPE, ACC.POSITION
                 from ALL_CONSTRAINTS AC, ALL_CONS_COLUMNS ACC
                   WHERE ACC.CONSTRAINT_NAME = AC.CONSTRAINT_NAME
                     AND ACC.TABLE_NAME = AC.TABLE_NAME
@@ -204,7 +203,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                 $subSql .= ' AND UPPER(ACC.OWNER) = UPPER(:SCNAME)';
                 $bind[':SCNAME'] = $schemaName;
             }
-            $sql="SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
+            $sql = "SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
                     TC.DATA_DEFAULT, TC.NULLABLE, TC.COLUMN_ID, TC.DATA_LENGTH,
                     TC.DATA_SCALE, TC.DATA_PRECISION, CC.CONSTRAINT_TYPE, CC.POSITION
                 FROM ALL_TAB_COLUMNS TC, ($subSql) CC
@@ -238,7 +237,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
 
         $desc = [];
         foreach ($result as $row) {
-            list ($primary, $primaryPosition, $identity) = [false, null, false];
+            list($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$constraint_type] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$position];
@@ -261,7 +260,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                 'UNSIGNED'         => null, // @todo
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
         }
         return $desc;
@@ -357,14 +356,14 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
          * Unfortunately because we use the column wildcard "*",
          * this puts an extra column into the query result set.
          */
-        $limit_sql = "SELECT z2.*
+        $limit_sql = 'SELECT z2.*
             FROM (
-                SELECT z1.*, ROWNUM AS \"zend_db_rownum\"
+                SELECT z1.*, ROWNUM AS "zend_db_rownum"
                 FROM (
-                    " . $sql . "
+                    ' . $sql . '
                 ) z1
             ) z2
-            WHERE z2.\"zend_db_rownum\" BETWEEN " . ($offset+1) . " AND " . ($offset+$count);
+            WHERE z2."zend_db_rownum" BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $count);
         return $limit_sql;
     }
 

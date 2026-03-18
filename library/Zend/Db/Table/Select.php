@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Zend Framework
  *
@@ -21,18 +23,15 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Select
  */
 #require_once 'Zend/Db/Select.php';
 
-
 /**
  * @see Zend_Db_Table_Abstract
  */
 #require_once 'Zend/Db/Table/Abstract.php';
-
 
 /**
  * Class for SQL SELECT query manipulation for the Zend_Db_Table component.
@@ -192,7 +191,6 @@ class Zend_Db_Table_Select extends Zend_Db_Select
         $fields  = $this->getPart(Zend_Db_Table_Select::COLUMNS);
         $primary = $this->_info[Zend_Db_Table_Abstract::NAME];
         $schema  = $this->_info[Zend_Db_Table_Abstract::SCHEMA];
-
 
         if (count($this->_parts[self::UNION]) == 0) {
 

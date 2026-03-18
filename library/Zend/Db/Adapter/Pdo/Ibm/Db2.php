@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,13 +22,11 @@
  * @version    $Id$
  */
 
-
 /** @see Zend_Db_Adapter_Pdo_Ibm */
 #require_once 'Zend/Db/Adapter/Pdo/Ibm.php';
 
 /** @see Zend_Db_Statement_Pdo_Ibm */
 #require_once 'Zend/Db/Statement/Pdo/Ibm.php';
-
 
 /**
  * @category   Zend
@@ -62,8 +62,8 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
      */
     public function listTables()
     {
-        $sql = "SELECT tabname "
-        . "FROM SYSCAT.TABLES ";
+        $sql = 'SELECT tabname '
+        . 'FROM SYSCAT.TABLES ';
         return $this->_adapter->fetchCol($sql);
     }
 
@@ -91,7 +91,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
         if ($schemaName) {
             $sql .= $this->_adapter->quoteInto(' AND UPPER(c.tabschema) = UPPER(?)', $schemaName);
         }
-        $sql .= " ORDER BY c.colno";
+        $sql .= ' ORDER BY c.colno';
 
         $desc = [];
         $stmt = $this->_adapter->query($sql);
@@ -119,7 +119,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
         $colseq         = 11;
 
         foreach ($result as $row) {
-            list ($primary, $primaryPosition, $identity) = [false, null, false];
+            list($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$tabconstype] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$colseq];
@@ -136,7 +136,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
             'SCHEMA_NAME'      => $this->_adapter->foldCase($row[$tabschema]),
             'TABLE_NAME'       => $this->_adapter->foldCase($row[$tabname]),
             'COLUMN_NAME'      => $this->_adapter->foldCase($row[$colname]),
-            'COLUMN_POSITION'  => $row[$colno]+1,
+            'COLUMN_POSITION'  => $row[$colno] + 1,
             'DATA_TYPE'        => $row[$typename],
             'DEFAULT'          => $row[$default],
             'NULLABLE'         => $row[$nulls] == 'Y',
@@ -146,7 +146,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
             'UNSIGNED'         => false,
             'PRIMARY'          => $primary,
             'PRIMARY_POSITION' => $primaryPosition,
-            'IDENTITY'         => $identity
+            'IDENTITY'         => $identity,
             ];
         }
 
@@ -183,14 +183,14 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
          * Unfortunately because we use the column wildcard "*",
          * this puts an extra column into the query result set.
          */
-        $limit_sql = "SELECT z2.*
+        $limit_sql = 'SELECT z2.*
               FROM (
-                  SELECT ROW_NUMBER() OVER() AS \"ZEND_DB_ROWNUM\", z1.*
+                  SELECT ROW_NUMBER() OVER() AS "ZEND_DB_ROWNUM", z1.*
                   FROM (
-                      " . $sql . "
+                      ' . $sql . '
                   ) z1
               ) z2
-              WHERE z2.zend_db_rownum BETWEEN " . ($offset+1) . " AND " . ($offset+$count);
+              WHERE z2.zend_db_rownum BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $count);
         return $limit_sql;
     }
 

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -411,7 +413,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
     {
         if (!isset($this->_data[$position])) {
             #require_once 'Zend/Db/Table/Rowset/Exception.php';
-            throw new Zend_Db_Table_Rowset_Exception("Data for provided position does not exist");
+            throw new Zend_Db_Table_Rowset_Exception('Data for provided position does not exist');
         }
 
         // do we already have a row object for this position?
@@ -421,14 +423,14 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
                     'table'    => $this->_table,
                     'data'     => $this->_data[$position],
                     'stored'   => $this->_stored,
-                    'readOnly' => $this->_readOnly
+                    'readOnly' => $this->_readOnly,
                 ]
             );
 
-            if ( $this->_table instanceof Zend_Db_Table_Abstract ) {
+            if ($this->_table instanceof Zend_Db_Table_Abstract) {
                 $info = $this->_table->info();
 
-                if ( $this->_rows[$position] instanceof Zend_Db_Table_Row_Abstract ) {
+                if ($this->_rows[$position] instanceof Zend_Db_Table_Row_Abstract) {
                     if ($info['cols'] == array_keys($this->_data[$position])) {
                         $this->_rows[$position]->setTable($this->getTable());
                     }

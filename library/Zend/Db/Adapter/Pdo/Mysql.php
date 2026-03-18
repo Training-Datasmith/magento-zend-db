@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 
 /**
  * Class for connecting to MySQL databases and performing common operations.
@@ -38,7 +38,6 @@
  */
 class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
 {
-
     /**
      * PDO type.
      *
@@ -73,7 +72,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         'DOUBLE'             => Zend_Db::FLOAT_TYPE,
         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
         'FIXED'              => Zend_Db::FLOAT_TYPE,
-        'FLOAT'              => Zend_Db::FLOAT_TYPE
+        'FLOAT'              => Zend_Db::FLOAT_TYPE,
     ];
 
     /**
@@ -113,7 +112,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
 
     public function getQuoteIdentifierSymbol(): string
     {
-        return "`";
+        return '`';
     }
 
     /**
@@ -188,15 +187,15 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
             if (preg_match('/^((?:var)?char)\((\d+)\)/', $row[$type], $matches)) {
                 $row[$type] = $matches[1];
                 $length = $matches[2];
-            } else if (preg_match('/^decimal\((\d+),(\d+)\)/', $row[$type], $matches)) {
+            } elseif (preg_match('/^decimal\((\d+),(\d+)\)/', $row[$type], $matches)) {
                 $row[$type] = 'decimal';
                 $precision = $matches[1];
                 $scale = $matches[2];
-            } else if (preg_match('/^float\((\d+),(\d+)\)/', $row[$type], $matches)) {
+            } elseif (preg_match('/^float\((\d+),(\d+)\)/', $row[$type], $matches)) {
                 $row[$type] = 'float';
                 $precision = $matches[1];
                 $scale = $matches[2];
-            } else if (preg_match('/^((?:big|medium|small|tiny)?int)(?:\((\d+)\))?/', $row[$type], $matches)) {
+            } elseif (preg_match('/^((?:big|medium|small|tiny)?int)(?:\((\d+)\))?/', $row[$type], $matches)) {
                 $row[$type] = $matches[1];
                 // The optional argument of a MySQL int type is not precision
                 // or length; it is only a hint for display width.
@@ -225,7 +224,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 'UNSIGNED'         => $unsigned,
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
             ++$i;
         }
@@ -240,8 +239,8 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
       * @param  integer $offset OPTIONAL
       * @throws Zend_Db_Adapter_Exception
       */
-     public function limit($sql, $count, $offset = 0): string
-     {
+    public function limit($sql, $count, $offset = 0): string
+    {
         $count = intval($count);
         if ($count <= 0) {
             /** @see Zend_Db_Adapter_Exception */

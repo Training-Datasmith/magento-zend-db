@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Table_Row_Abstract
  */
 #require_once 'Zend/Db/Table/Row/Abstract.php';
-
 
 /**
  * Reference concrete class that extends Zend_Db_Table_Row_Abstract.

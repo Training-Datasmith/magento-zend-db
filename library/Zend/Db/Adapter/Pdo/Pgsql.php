@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 
 /**
  * Class for connecting to PostgreSQL databases and performing common operations.
@@ -38,7 +38,6 @@
  */
 class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
 {
-
     /**
      * PDO type.
      *
@@ -69,7 +68,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         'DECIMAL'            => Zend_Db::FLOAT_TYPE,
         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
-        'REAL'               => Zend_Db::FLOAT_TYPE
+        'REAL'               => Zend_Db::FLOAT_TYPE,
     ];
 
     /**
@@ -100,17 +99,17 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     public function listTables()
     {
         // @todo use a better query with joins instead of subqueries
-        $sql = "SELECT c.relname AS table_name "
-             . "FROM pg_class c, pg_user u "
+        $sql = 'SELECT c.relname AS table_name '
+             . 'FROM pg_class c, pg_user u '
              . "WHERE c.relowner = u.usesysid AND c.relkind = 'r' "
-             . "AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) "
+             . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) '
              . "AND c.relname !~ '^(pg_|sql_)' "
-             . "UNION "
-             . "SELECT c.relname AS table_name "
-             . "FROM pg_class c "
+             . 'UNION '
+             . 'SELECT c.relname AS table_name '
+             . 'FROM pg_class c '
              . "WHERE c.relkind = 'r' "
-             . "AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) "
-             . "AND NOT EXISTS (SELECT 1 FROM pg_user WHERE usesysid = c.relowner) "
+             . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) '
+             . 'AND NOT EXISTS (SELECT 1 FROM pg_user WHERE usesysid = c.relowner) '
              . "AND c.relname !~ '^pg_'";
 
         return $this->fetchCol($sql);
@@ -169,7 +168,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 LEFT OUTER JOIN pg_attrdef AS d ON d.adrelid = c.oid AND d.adnum = a.attnum
             WHERE a.attnum > 0 AND c.relname = ".$this->quote($tableName);
         if ($schemaName) {
-            $sql .= " AND n.nspname = ".$this->quote($schemaName);
+            $sql .= ' AND n.nspname = '.$this->quote($schemaName);
         }
         $sql .= ' ORDER BY a.attnum';
 
@@ -193,7 +192,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         $desc = [];
         foreach ($result as $row) {
             $defaultValue = $row[$default_value];
-            if ($row[$type] == 'varchar' || $row[$type] == 'bpchar' ) {
+            if ($row[$type] == 'varchar' || $row[$type] == 'bpchar') {
                 if (preg_match('/character(?: varying)?(?:\((\d+)\))?/', $row[$complete_type], $matches)) {
                     if (isset($matches[1])) {
                         $row[$length] = $matches[1];
@@ -225,12 +224,11 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 'UNSIGNED'         => null, // @todo
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
         }
         return $desc;
     }
-
 
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
@@ -279,9 +277,9 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
         $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        return $this->fetchOne("SELECT CURRVAL("
+        return $this->fetchOne('SELECT CURRVAL('
                . $this->quote($this->quoteIdentifier($sequenceName, true))
-               . ")");
+               . ')');
     }
 
     /**
@@ -296,9 +294,9 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
         $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        return $this->fetchOne("SELECT NEXTVAL("
+        return $this->fetchOne('SELECT NEXTVAL('
                . $this->quote($this->quoteIdentifier($sequenceName, true))
-               . ")");
+               . ')');
     }
 
     /**

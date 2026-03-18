@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -39,7 +41,6 @@
  */
 class Zend_Db_Statement_Pdo extends Zend_Db_Statement implements IteratorAggregate
 {
-
     /**
      * @var int
      */

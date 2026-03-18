@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -135,8 +137,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
             'Database' => $this->_config['dbname'],
         ];
 
-        if (isset($this->_config['username']) && isset($this->_config['password']))
-        {
+        if (isset($this->_config['username']) && isset($this->_config['password'])) {
             $connectionInfo += [
                 'UID'      => $this->_config['username'],
                 'PWD'      => $this->_config['password'],
@@ -216,26 +217,25 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         $sql = null;
 
         // Default transaction level in sql server
-        if ($level === null)
-        {
+        if ($level === null) {
             $level = SQLSRV_TXN_READ_COMMITTED;
         }
 
         switch ($level) {
             case SQLSRV_TXN_READ_UNCOMMITTED:
-                $sql = "READ UNCOMMITTED";
+                $sql = 'READ UNCOMMITTED';
                 break;
             case SQLSRV_TXN_READ_COMMITTED:
-                $sql = "READ COMMITTED";
+                $sql = 'READ COMMITTED';
                 break;
             case SQLSRV_TXN_REPEATABLE_READ:
-                $sql = "REPEATABLE READ";
+                $sql = 'REPEATABLE READ';
                 break;
             case SQLSRV_TXN_SNAPSHOT:
-                $sql = "SNAPSHOT";
+                $sql = 'SNAPSHOT';
                 break;
             case SQLSRV_TXN_SERIALIZABLE:
-                $sql = "SERIALIZABLE";
+                $sql = 'SERIALIZABLE';
                 break;
             default:
                 #require_once 'Zend/Db/Adapter/Sqlsrv/Exception.php';
@@ -368,7 +368,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         }
 
         // build the statement
-        $sql = "INSERT INTO "
+        $sql = 'INSERT INTO '
              . $this->quoteIdentifier($table, true)
              . ' (' . implode(', ', $cols) . ') '
              . 'VALUES (' . implode(', ', $vals) . ')'
@@ -431,7 +431,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         /**
          * Discover metadata information about this table.
          */
-        $sql    = "exec sp_columns @table_name = " . $this->quoteIdentifier($tableName, true);
+        $sql    = 'exec sp_columns @table_name = ' . $this->quoteIdentifier($tableName, true);
         $stmt   = $this->query($sql);
         $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
 
@@ -457,8 +457,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
          * Discover primary key column(s) for this table.
          */
         $tableOwner = $result[0][$owner];
-        $sql        = "exec sp_pkeys @table_owner = " . $tableOwner
-                    . ", @table_name = " . $this->quoteIdentifier($tableName, true);
+        $sql        = 'exec sp_pkeys @table_owner = ' . $tableOwner
+                    . ', @table_name = ' . $this->quoteIdentifier($tableName, true);
         $stmt       = $this->query($sql);
 
         $primaryKeysResult = $stmt->fetchAll(Zend_Db::FETCH_NUM);
@@ -591,8 +591,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      * @return string
      * @throws Zend_Db_Adapter_Sqlsrv_Exception
      */
-     public function limit($sql, $count, $offset = 0)
-     {
+    public function limit($sql, $count, $offset = 0)
+    {
         $count = intval($count);
         if ($count <= 0) {
             #require_once 'Zend/Db/Adapter/Exception.php';
@@ -627,8 +627,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
 
             if ($count == PHP_INT_MAX) {
                 $sql = "WITH outer_tbl AS ($sql) SELECT * FROM outer_tbl WHERE \"ZEND_DB_ROWNUM\" >= $start";
-            }
-            else {
+            } else {
                 $end = $offset + $count;
                 $sql = "WITH outer_tbl AS ($sql) SELECT * FROM outer_tbl WHERE \"ZEND_DB_ROWNUM\" BETWEEN $start AND $end";
             }

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -35,11 +37,11 @@
  */
 class Zend_Db_Adapter_Db2_Exception extends Zend_Db_Adapter_Exception
 {
-   protected $code = '00000';
-   protected $message = 'unknown exception';
+    protected $code = '00000';
+    protected $message = 'unknown exception';
 
-   function __construct($message = 'unknown exception', $code = '00000', ?Exception $e = null)
-   {
-       parent::__construct($message, $code, $e);
-   }
+    public function __construct($message = 'unknown exception', $code = '00000', ?Exception $e = null)
+    {
+        parent::__construct($message, $code, $e);
+    }
 }

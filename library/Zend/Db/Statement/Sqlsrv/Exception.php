@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -45,7 +47,7 @@ class Zend_Db_Statement_Sqlsrv_Exception extends Zend_Db_Statement_Exception
      */
     public function __construct($message = null, $code = 0)
     {
-       if (is_array($message)) {
+        if (is_array($message)) {
             // Error should be array of errors
             // We only need first one (?)
             if (isset($message[0])) {
@@ -54,7 +56,6 @@ class Zend_Db_Statement_Sqlsrv_Exception extends Zend_Db_Statement_Exception
 
             $code    = (int)    $message['code'];
             $message = (string) $message['message'];
-       }
-   }
+        }
+    }
 }
-

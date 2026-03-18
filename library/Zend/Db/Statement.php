@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -41,7 +43,6 @@
  */
 abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
 {
-
     /**
      * @var resource|object The driver level statement object/resource
      */
@@ -140,7 +141,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                 '/(\?|\:[a-zA-Z0-9_]+)/',
                 $sql,
                 -1,
-                PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY
+                PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
             );
         }
 
@@ -155,7 +156,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                     #require_once 'Zend/Db/Statement/Exception.php';
                     throw new Zend_Db_Statement_Exception("Invalid bind-variable position '$val'");
                 }
-            } else if ($val[0] == ':') {
+            } elseif ($val[0] == ':') {
                 if ($this->_adapter->supportsParameters('named') === false) {
                     /**
                      * @see Zend_Db_Statement_Exception
@@ -189,7 +190,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         $qe = $this->_adapter->quote($q);
         $qe = substr($qe, 1, 2);
         $qe = preg_quote($qe);
-        $escapeChar = substr($qe,0,1);
+        $escapeChar = substr($qe, 0, 1);
         // remove 'foo\'bar'
         if (!empty($q)) {
             $escapeChar = preg_quote($escapeChar);
@@ -206,7 +207,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         // get a version of the SQL statement with all quoted
         // values and delimited identifiers stripped out
         // remove "foo\"bar"
-        $sql = preg_replace("/\"(\\\\\"|[^\"])*\"/Us", '', $sql);
+        $sql = preg_replace('/"(\\\\"|[^"])*"/Us', '', $sql);
 
         // get the character for delimited id quotes,
         // this is usually " but in MySQL is `
@@ -233,7 +234,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      */
     public function bindColumn($column, &$param, $type = null)
     {
-        $this->_bindColumn[$column] =& $param;
+        $this->_bindColumn[$column] = & $param;
         return true;
     }
 
@@ -262,7 +263,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
             if ($intval >= 1 || $intval <= count($this->_sqlParam)) {
                 $position = $intval;
             }
-        } else if ($this->_adapter->supportsParameters('named')) {
+        } elseif ($this->_adapter->supportsParameters('named')) {
             if ($parameter[0] != ':') {
                 $parameter = ':' . $parameter;
             }
@@ -280,7 +281,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         }
 
         // Finally we are assured that $position is valid
-        $this->_bindParam[$position] =& $variable;
+        $this->_bindParam[$position] = & $variable;
         return $this->_bindParam($position, $variable, $type, $length, $options);
     }
 

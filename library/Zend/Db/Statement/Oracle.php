@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -36,7 +38,6 @@
  */
 class Zend_Db_Statement_Oracle extends Zend_Db_Statement
 {
-
     /**
      * Column names.
      */
@@ -109,12 +110,12 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
     protected function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null): bool
     {
         // default value
-        if ($type === NULL) {
+        if ($type === null) {
             $type = SQLT_CHR;
         }
 
         // default value
-        if ($length === NULL) {
+        if ($length === null) {
             $length = -1;
         }
 
@@ -159,7 +160,6 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
         return oci_num_fields($this->_stmt);
     }
 
-
     /**
      * Retrieves the error code, if any, associated with the last operation on
      * the statement handle.
@@ -180,7 +180,6 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
 
         return $error['code'];
     }
-
 
     /**
      * Retrieves an array of error information, if any, associated with the
@@ -212,7 +211,6 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
             $error['message'],
         ];
     }
-
 
     /**
      * Executes a prepared statement.
@@ -322,7 +320,7 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
                 throw new Zend_Db_Statement_Oracle_Exception(
                     [
                         'code'    => 'HYC00',
-                        'message' => "Invalid fetch mode '$style' specified"
+                        'message' => "Invalid fetch mode '$style' specified",
                     ]
                 );
         }
@@ -372,7 +370,7 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
                 throw new Zend_Db_Statement_Oracle_Exception(
                     [
                         'code'    => 'HYC00',
-                        'message' => "OCI8 driver does not support fetchAll(FETCH_BOTH), use fetch() in a loop instead"
+                        'message' => 'OCI8 driver does not support fetchAll(FETCH_BOTH), use fetch() in a loop instead',
                     ]
                 );
             case Zend_Db::FETCH_NUM:
@@ -384,7 +382,7 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
             case Zend_Db::FETCH_OBJ:
                 break;
             case Zend_Db::FETCH_COLUMN:
-                $flags = $flags &~ OCI_FETCHSTATEMENT_BY_ROW;
+                $flags = $flags & ~ OCI_FETCHSTATEMENT_BY_ROW;
                 $flags |= OCI_FETCHSTATEMENT_BY_COLUMN;
                 $flags |= OCI_NUM;
                 break;
@@ -396,14 +394,14 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
                 throw new Zend_Db_Statement_Oracle_Exception(
                     [
                         'code'    => 'HYC00',
-                        'message' => "Invalid fetch mode '$style' specified"
+                        'message' => "Invalid fetch mode '$style' specified",
                     ]
                 );
         }
 
         $result = [];
         if ($flags != OCI_FETCHSTATEMENT_BY_ROW) { /* not Zend_Db::FETCH_OBJ */
-            if (! ($rows = oci_fetch_all($this->_stmt, $result, 0, -1, $flags) )) {
+            if (! ($rows = oci_fetch_all($this->_stmt, $result, 0, -1, $flags))) {
                 if ($error = oci_error($this->_stmt)) {
                     /**
                      * @see Zend_Db_Adapter_Oracle_Exception
@@ -437,7 +435,6 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
         return $result;
     }
 
-
     /**
      * Returns a single column from the next row of a result set.
      *
@@ -463,7 +460,7 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
             throw new Zend_Db_Statement_Oracle_Exception($error);
         }
 
-        $data = oci_result($this->_stmt, $col+1); //1-based
+        $data = oci_result($this->_stmt, $col + 1); //1-based
         if ($data === false) {
             /**
              * @see Zend_Db_Adapter_Oracle_Exception
@@ -529,7 +526,7 @@ class Zend_Db_Statement_Oracle extends Zend_Db_Statement
         throw new Zend_Db_Statement_Oracle_Exception(
             [
                 'code'    => 'HYC00',
-                'message' => 'Optional feature not implemented'
+                'message' => 'Optional feature not implemented',
             ]
         );
     }

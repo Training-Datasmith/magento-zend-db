@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -34,7 +36,6 @@
  */
 abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggregate
 {
-
     /**
      * The data for each column in the row (column_name => value).
      * The keys must match the physical names of columns in the
@@ -274,33 +275,33 @@ abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggreg
      * @param string $offset
      * @return string
      */
-     public function offsetGet($offset)
-     {
-         return $this->__get($offset);
-     }
+    public function offsetGet($offset)
+    {
+        return $this->__get($offset);
+    }
 
-     /**
-      * Proxy to __set
-      * Required by the ArrayAccess implementation
-      *
-      * @param string $offset
-      * @param mixed $value
-      */
-     public function offsetSet($offset, $value)
-     {
-         $this->__set($offset, $value);
-     }
+    /**
+     * Proxy to __set
+     * Required by the ArrayAccess implementation
+     *
+     * @param string $offset
+     * @param mixed $value
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->__set($offset, $value);
+    }
 
-     /**
-      * Proxy to __unset
-      * Required by the ArrayAccess implementation
-      *
-      * @param string $offset
-      */
-     public function offsetUnset($offset)
-     {
-         return $this->__unset($offset);
-     }
+    /**
+     * Proxy to __unset
+     * Required by the ArrayAccess implementation
+     *
+     * @param string $offset
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->__unset($offset);
+    }
 
     /**
      * Initialize object
@@ -705,7 +706,7 @@ abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggreg
     {
         if (!is_array($this->_primary)) {
             #require_once 'Zend/Db/Table/Row/Exception.php';
-            throw new Zend_Db_Table_Row_Exception("The primary key must be set as an array");
+            throw new Zend_Db_Table_Row_Exception('The primary key must be set as an array');
         }
 
         $primary = array_flip($this->_primary);
@@ -993,9 +994,13 @@ abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggreg
      * @return Zend_Db_Table_Rowset_Abstract Query result from $matchTable
      * @throws Zend_Db_Table_Row_Exception If $matchTable or $intersectionTable is not a table class or is not loadable.
      */
-    public function findManyToManyRowset($matchTable, $intersectionTable, $callerRefRule = null,
-                                         $matchRefRule = null, ?Zend_Db_Table_Select $select = null)
-    {
+    public function findManyToManyRowset(
+        $matchTable,
+        $intersectionTable,
+        $callerRefRule = null,
+        $matchRefRule = null,
+        ?Zend_Db_Table_Select $select = null
+    ) {
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($intersectionTable)) {
@@ -1085,7 +1090,7 @@ abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggreg
             'data'     => $stmt->fetchAll(Zend_Db::FETCH_ASSOC),
             'rowClass' => $matchTable->getRowClass(),
             'readOnly' => false,
-            'stored'   => true
+            'stored'   => true,
         ];
 
         $rowsetClass = $matchTable->getRowsetClass();
@@ -1161,7 +1166,6 @@ abstract class Zend_Db_Table_Row_Abstract implements ArrayAccess, IteratorAggreg
         #require_once 'Zend/Db/Table/Row/Exception.php';
         throw new Zend_Db_Table_Row_Exception("Unrecognized method '$method()'");
     }
-
 
     /**
      * _getTableFromString

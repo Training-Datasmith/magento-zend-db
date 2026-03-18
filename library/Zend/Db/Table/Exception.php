@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -35,4 +37,3 @@
 class Zend_Db_Table_Exception extends Zend_Db_Exception
 {
 }
-

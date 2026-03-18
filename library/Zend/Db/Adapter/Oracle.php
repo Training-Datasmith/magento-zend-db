@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -55,7 +57,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
         'dbname'       => null,
         'username'     => null,
         'password'     => null,
-        'persistent'   => false
+        'persistent'   => false,
     ];
 
     /**
@@ -124,10 +126,11 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
         $connectionFuncName = ($this->_config['persistent'] == true) ? 'oci_pconnect' : 'oci_connect';
 
         $this->_connection = @$connectionFuncName(
-                $this->_config['username'],
-                $this->_config['password'],
-                $this->_config['dbname'],
-                $this->_config['charset']);
+            $this->_config['username'],
+            $this->_config['password'],
+            $this->_config['dbname'],
+            $this->_config['charset']
+        );
 
         // check the connection
         if (!$this->_connection) {
@@ -147,7 +150,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
         return (is_resource($this->_connection)
                     && (get_resource_type($this->_connection) == 'oci8 connection'
                      || get_resource_type($this->_connection) == 'oci8 persistent connection'));
-        }
+    }
 
     /**
      * Force the connection to close.
@@ -364,7 +367,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
             }
             $sql .= ' ORDER BY TC.COLUMN_ID';
         } else {
-            $subSql="SELECT AC.OWNER, AC.TABLE_NAME, ACC.COLUMN_NAME, AC.CONSTRAINT_TYPE, ACC.POSITION
+            $subSql = "SELECT AC.OWNER, AC.TABLE_NAME, ACC.COLUMN_NAME, AC.CONSTRAINT_TYPE, ACC.POSITION
                 from ALL_CONSTRAINTS AC, ALL_CONS_COLUMNS ACC
                   WHERE ACC.CONSTRAINT_NAME = AC.CONSTRAINT_NAME
                     AND ACC.TABLE_NAME = AC.TABLE_NAME
@@ -376,7 +379,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                 $subSql .= ' AND UPPER(ACC.OWNER) = UPPER(:SCNAME)';
                 $bind[':SCNAME'] = $schemaName;
             }
-            $sql="SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
+            $sql = "SELECT TC.TABLE_NAME, TC.OWNER, TC.COLUMN_NAME, TC.DATA_TYPE,
                     TC.DATA_DEFAULT, TC.NULLABLE, TC.COLUMN_ID, TC.DATA_LENGTH,
                     TC.DATA_SCALE, TC.DATA_PRECISION, CC.CONSTRAINT_TYPE, CC.POSITION
                 FROM ALL_TAB_COLUMNS TC, ($subSql) CC
@@ -410,7 +413,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
 
         $desc = [];
         foreach ($result as $row) {
-            list ($primary, $primaryPosition, $identity) = [false, null, false];
+            list($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$constraint_type] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$position];
@@ -433,7 +436,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                 'UNSIGNED'         => null, // @todo
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
         }
         return $desc;
@@ -552,14 +555,14 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
          * Unfortunately because we use the column wildcard "*",
          * this puts an extra column into the query result set.
          */
-        $limit_sql = "SELECT z2.*
+        $limit_sql = 'SELECT z2.*
             FROM (
-                SELECT z1.*, ROWNUM AS \"zend_db_rownum\"
+                SELECT z1.*, ROWNUM AS "zend_db_rownum"
                 FROM (
-                    " . $sql . "
+                    ' . $sql . '
                 ) z1
             ) z2
-            WHERE z2.\"zend_db_rownum\" BETWEEN " . ($offset+1) . " AND " . ($offset+$count);
+            WHERE z2."zend_db_rownum" BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $count);
         return $limit_sql;
     }
 
@@ -568,7 +571,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      */
     private function _setExecuteMode(int $mode)
     {
-        switch($mode) {
+        switch ($mode) {
             case OCI_COMMIT_ON_SUCCESS:
             case OCI_DEFAULT:
             case OCI_DESCRIBE_ONLY:

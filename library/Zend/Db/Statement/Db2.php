@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -35,7 +37,6 @@
  */
 class Zend_Db_Statement_Db2 extends Zend_Db_Statement
 {
-
     /**
      * Column names.
      */
@@ -95,7 +96,7 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
             $datatype = DB2_CHAR;
         }
 
-        if (!db2_bind_param($this->_stmt, $parameter, "variable", $type, $datatype)) {
+        if (!db2_bind_param($this->_stmt, $parameter, 'variable', $type, $datatype)) {
             /**
              * @see Zend_Db_Statement_Db2_Exception
              */
@@ -121,7 +122,6 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
         $this->_stmt = false;
         return true;
     }
-
 
     /**
      * Returns the number of columns in the result set.
@@ -166,7 +166,7 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
     public function errorInfo()
     {
         $error = $this->errorCode();
-        if ($error === false){
+        if ($error === false) {
             return false;
         }
 
@@ -177,7 +177,7 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
         return [
             $error,
             $error,
-            db2_stmt_errormsg()
+            db2_stmt_errormsg(),
         ];
     }
 
@@ -208,7 +208,8 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
             #require_once 'Zend/Db/Statement/Db2/Exception.php';
             throw new Zend_Db_Statement_Db2_Exception(
                 db2_stmt_errormsg(),
-                db2_stmt_error());
+                db2_stmt_error()
+            );
         }
 
         $this->_keys = [];
@@ -327,17 +328,17 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
         return $num;
     }
 
-     /**
-     * Returns an array containing all of the result set rows.
-     *
-     * @param int $style OPTIONAL Fetch mode.
-     * @param int $col   OPTIONAL Column number, if fetch mode is by column.
-     * @return array Collection of rows, each in a format by the fetch mode.
-     *
-     * Behaves like parent, but if limit()
-     * is used, the final result removes the extra column
-     * 'zend_db_rownum'
-     */
+    /**
+    * Returns an array containing all of the result set rows.
+    *
+    * @param int $style OPTIONAL Fetch mode.
+    * @param int $col   OPTIONAL Column number, if fetch mode is by column.
+    * @return array Collection of rows, each in a format by the fetch mode.
+    *
+    * Behaves like parent, but if limit()
+    * is used, the final result removes the extra column
+    * 'zend_db_rownum'
+    */
     public function fetchAll($style = null, $col = null): array
     {
         $data = parent::fetchAll($style, $col);

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 
 /**
  * Class for connecting to SQLite2 and SQLite3 databases and performing common operations.
@@ -38,13 +38,12 @@
  */
 class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
 {
-
     /**
      * PDO type
      *
      * @var string
      */
-     protected $_pdoType = 'sqlite';
+    protected $_pdoType = 'sqlite';
 
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
@@ -62,7 +61,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
         'INTEGER'            => Zend_Db::BIGINT_TYPE,
-        'REAL'               => Zend_Db::FLOAT_TYPE
+        'REAL'               => Zend_Db::FLOAT_TYPE,
     ];
 
     /**
@@ -160,7 +159,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
     public function listTables()
     {
         $sql = "SELECT name FROM sqlite_master WHERE type='table' "
-             . "UNION ALL SELECT name FROM sqlite_temp_master "
+             . 'UNION ALL SELECT name FROM sqlite_temp_master '
              . "WHERE type='table' ORDER BY name";
 
         return $this->fetchCol($sql);
@@ -226,7 +225,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
             if (preg_match('/^((?:var)?char)\((\d+)\)/i', $row[$type], $matches)) {
                 $row[$type] = $matches[1];
                 $length = $matches[2];
-            } else if (preg_match('/^decimal\((\d+),(\d+)\)/i', $row[$type], $matches)) {
+            } elseif (preg_match('/^decimal\((\d+),(\d+)\)/i', $row[$type], $matches)) {
                 $row[$type] = 'DECIMAL';
                 $precision = $matches[1];
                 $scale = $matches[2];
@@ -244,7 +243,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
                 'SCHEMA_NAME'      => $this->foldCase($schemaName),
                 'TABLE_NAME'       => $this->foldCase($tableName),
                 'COLUMN_NAME'      => $this->foldCase($row[$name]),
-                'COLUMN_POSITION'  => $row[$cid]+1,
+                'COLUMN_POSITION'  => $row[$cid] + 1,
                 'DATA_TYPE'        => $row[$type],
                 'DEFAULT'          => $row[$dflt_value],
                 'NULLABLE'         => ! (bool) $row[$notnull],
@@ -254,7 +253,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
                 'UNSIGNED'         => null, // Sqlite3 does not support unsigned data
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity
+                'IDENTITY'         => $identity,
             ];
         }
         return $desc;

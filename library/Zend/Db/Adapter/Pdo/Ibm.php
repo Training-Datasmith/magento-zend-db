@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,7 +22,6 @@
  * @version    $Id$
  */
 
-
 /** @see Zend_Db_Adapter_Pdo_Abstract */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
 
@@ -32,7 +33,6 @@
 
 /** @see Zend_Db_Statement_Pdo_Ibm */
 #require_once 'Zend/Db/Statement/Pdo/Ibm.php';
-
 
 /**
  * @category   Zend
@@ -80,7 +80,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                         'REAL'               => Zend_Db::FLOAT_TYPE,
                         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
                         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
-                        'FLOAT'              => Zend_Db::FLOAT_TYPE
+                        'FLOAT'              => Zend_Db::FLOAT_TYPE,
                         ];
 
     /**
@@ -127,14 +127,14 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                         $this->_numericDataTypes['MONEY']        = Zend_Db::FLOAT_TYPE;
 
                         break;
-                    }
+                }
             }
         } catch (PDOException $e) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             $error = strpos($e->getMessage(), 'driver does not support that attribute');
             if ($error) {
-                throw new Zend_Db_Adapter_Exception("PDO_IBM driver extension is downlevel.  Please use driver release version 1.2.1 or later", 0, $e);
+                throw new Zend_Db_Adapter_Exception('PDO_IBM driver extension is downlevel.  Please use driver release version 1.2.1 or later', 0, $e);
             }
             throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
         }
@@ -256,7 +256,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
         $newbind = [];
         if (is_array($bind)) {
             foreach ($bind as $name => $value) {
-                if($value !== null) {
+                if ($value !== null) {
                     $newbind[$name] = $value;
                 }
             }
@@ -275,8 +275,8 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      */
     public function limit($sql, $count, $offset = 0)
     {
-       $this->_connect();
-       return $this->_serverType->limit($sql, $count, $offset);
+        $this->_connect();
+        return $this->_serverType->limit($sql, $count, $offset);
     }
 
     /**
@@ -291,7 +291,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
 
-         if ($tableName !== null) {
+        if ($tableName !== null) {
             $sequenceName = $tableName;
             if ($primaryKey) {
                 $sequenceName .= "_$primaryKey";

@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -39,7 +41,6 @@
  */
 class Zend_Db_Statement_Pdo_Oci extends Zend_Db_Statement_Pdo
 {
-
     /**
     * Returns an array containing all of the result set rows.
     *
@@ -66,7 +67,6 @@ class Zend_Db_Statement_Pdo_Oci extends Zend_Db_Statement_Pdo
         }
         return $results;
     }
-
 
     /**
      * Fetches a row from the result set.

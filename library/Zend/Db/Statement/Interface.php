@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -31,7 +33,6 @@
  */
 interface Zend_Db_Statement_Interface
 {
-
     /**
      * Bind a column of the statement result set to a PHP variable.
      *

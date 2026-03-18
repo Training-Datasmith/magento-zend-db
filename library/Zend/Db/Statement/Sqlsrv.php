@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -36,7 +38,6 @@
  */
 class Zend_Db_Statement_Sqlsrv extends Zend_Db_Statement
 {
-
     /**
      * The connection_stmt object original string.
      */
@@ -118,7 +119,6 @@ class Zend_Db_Statement_Sqlsrv extends Zend_Db_Statement
         return 0;
     }
 
-
     /**
      * Retrieves the error code, if any, associated with the last operation on
      * the statement handle.
@@ -138,7 +138,6 @@ class Zend_Db_Statement_Sqlsrv extends Zend_Db_Statement
 
         return $error[0]['code'];
     }
-
 
     /**
      * Retrieves an array of error information, if any, associated with the
@@ -162,7 +161,6 @@ class Zend_Db_Statement_Sqlsrv extends Zend_Db_Statement
             $error[0]['message'],
         ];
     }
-
 
     /**
      * Executes a prepared statement.

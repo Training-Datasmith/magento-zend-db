@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * Zend Framework
  *
@@ -20,12 +22,10 @@
  * @version    $Id$
  */
 
-
 /**
  * @see Zend_Db_Exception
  */
 #require_once 'Zend/Db/Exception.php';
-
 
 /**
  * @category   Zend
@@ -37,4 +37,3 @@
 class Zend_Db_Profiler_Exception extends Zend_Db_Exception
 {
 }
-
