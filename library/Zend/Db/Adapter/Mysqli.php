@@ -63,7 +63,7 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -80,12 +80,12 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
         'FIXED'              => Zend_Db::FLOAT_TYPE,
         'FLOAT'              => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * @var Zend_Db_Statement_Mysqli
      */
-    protected $_stmt = null;
+    protected $_stmt;
 
     /**
      * Default class name for a DB statement.
@@ -112,22 +112,18 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
 
     /**
      * Returns the symbol the adapter uses for delimiting identifiers.
-     *
-     * @return string
      */
-    public function getQuoteIdentifierSymbol()
+    public function getQuoteIdentifierSymbol(): string
     {
         return "`";
     }
 
     /**
      * Returns a list of the tables in the database.
-     *
-     * @return array
      */
-    public function listTables()
+    public function listTables(): array
     {
-        $result = array();
+        $result = [];
         // Use mysqli extension API, because SHOW doesn't work
         // well as a prepared statement on MySQL 4.1.
         $sql = 'SHOW TABLES';
@@ -172,9 +168,8 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         /**
          * @todo  use INFORMATION_SCHEMA someday when
@@ -204,9 +199,9 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
             throw new Zend_Db_Adapter_Mysqli_Exception($this->getConnection()->error);
         }
 
-        $desc = array();
+        $desc = [];
 
-        $row_defaults = array(
+        $row_defaults = [
             'Length'          => null,
             'Scale'           => null,
             'Precision'       => null,
@@ -214,10 +209,10 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
             'Primary'         => false,
             'PrimaryPosition' => null,
             'Identity'        => false
-        );
+        ];
         $i = 1;
         $p = 1;
-        foreach ($result as $key => $row) {
+        foreach ($result as $row) {
             $row = array_merge($row_defaults, $row);
             if (preg_match('/unsigned/', $row['Type'])) {
                 $row['Unsigned'] = true;
@@ -250,14 +245,14 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
                 }
                 ++$p;
             }
-            $desc[$this->foldCase($row['Field'])] = array(
+            $desc[$this->foldCase($row['Field'])] = [
                 'SCHEMA_NAME'      => null, // @todo
                 'TABLE_NAME'       => $this->foldCase($tableName),
                 'COLUMN_NAME'      => $this->foldCase($row['Field']),
                 'COLUMN_POSITION'  => $i,
                 'DATA_TYPE'        => $row['Type'],
                 'DEFAULT'          => $row['Default'],
-                'NULLABLE'         => (bool) ($row['Null'] == 'YES'),
+                'NULLABLE'         => $row['Null'] == 'YES',
                 'LENGTH'           => $row['Length'],
                 'SCALE'            => $row['Scale'],
                 'PRECISION'        => $row['Precision'],
@@ -265,7 +260,7 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
                 'PRIMARY'          => $row['Primary'],
                 'PRIMARY_POSITION' => $row['PrimaryPosition'],
                 'IDENTITY'         => $row['Identity']
-            );
+            ];
             ++$i;
         }
         return $desc;
@@ -347,12 +342,10 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
 
     /**
      * Test if a connection is active
-     *
-     * @return boolean
      */
-    public function isConnected()
+    public function isConnected(): bool
     {
-        return ((bool) ($this->_connection instanceof mysqli));
+        return ($this->_connection instanceof mysqli);
     }
 
     /**
@@ -408,10 +401,9 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
      *
      * @param string $tableName   OPTIONAL Name of table.
      * @param string $primaryKey  OPTIONAL Name of primary key column.
-     * @return string
      * @todo Return value should be int?
      */
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function lastInsertId($tableName = null, $primaryKey = null): string
     {
         $mysqli = $this->_connection;
         return (string) $mysqli->insert_id;
@@ -476,7 +468,6 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
                  */
                 #require_once 'Zend/Db/Adapter/Mysqli/Exception.php';
                 throw new Zend_Db_Adapter_Mysqli_Exception('FETCH_BOUND is not supported yet');
-                break;
             default:
                 /**
                  * @see Zend_Db_Adapter_Mysqli_Exception
@@ -492,9 +483,8 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
      * @param string $sql
      * @param int $count
      * @param int $offset OPTIONAL
-     * @return string
      */
-    public function limit($sql, $count, $offset = 0)
+    public function limit($sql, $count, $offset = 0): string
     {
         $count = intval($count);
         if ($count <= 0) {
@@ -526,9 +516,8 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
      * Check if the adapter supports real SQL parameters.
      *
      * @param string $type 'positional' or 'named'
-     * @return bool
      */
-    public function supportsParameters($type)
+    public function supportsParameters($type): bool
     {
         switch ($type) {
             case 'positional':
@@ -541,16 +530,14 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
 
     /**
      * Retrieve server version in PHP style
-     *
-     *@return string
      */
-    public function getServerVersion()
+    public function getServerVersion(): string
     {
         $this->_connect();
         $version = $this->_connection->server_version;
         $major = (int) ($version / 10000);
         $minor = (int) ($version % 10000 / 100);
-        $revision = (int) ($version % 100);
+        $revision = $version % 100;
         return $major . '.' . $minor . '.' . $revision;
     }
 }

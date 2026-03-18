@@ -69,7 +69,7 @@ class Zend_Db_Expr
     /**
      * @return string The string of the SQL expression stored in this object.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->_expression;
     }

@@ -56,7 +56,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
     /**
      * @var array
      */
-    protected $_meta = null;
+    protected $_meta;
 
     /**
      * @param  string $sql
@@ -86,10 +86,9 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
      * @param mixed $type      OPTIONAL Datatype of SQL parameter.
      * @param mixed $length    OPTIONAL Length of SQL parameter.
      * @param mixed $options   OPTIONAL Other options.
-     * @return bool
      * @throws Zend_Db_Statement_Mysqli_Exception
      */
-    protected function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null)
+    protected function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null): bool
     {
         return true;
     }
@@ -166,11 +165,11 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         if (!$this->_stmt) {
             return false;
         }
-        return array(
+        return [
             substr($this->_stmt->sqlstate, 0, 5),
             $this->_stmt->errno,
             $this->_stmt->error,
-        );
+        ];
     }
 
     /**
@@ -194,12 +193,12 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         // send $params as input parameters to the statement
         if ($params) {
             array_unshift($params, str_repeat('s', count($params)));
-            $stmtParams = array();
+            $stmtParams = [];
             foreach ($params as $k => &$value) {
                 $stmtParams[$k] = &$value;
             }
             call_user_func_array(
-                array($this->_stmt, 'bind_param'),
+                [$this->_stmt, 'bind_param'],
                 $stmtParams
                 );
         }
@@ -231,7 +230,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
         if ($this->_meta !== false) {
 
             // get the column names that will result
-            $this->_keys = array();
+            $this->_keys = [];
             foreach ($this->_meta->fetch_fields() as $col) {
                 $this->_keys[] = $this->_adapter->foldCase($col->name);
             }
@@ -242,7 +241,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
             // set up references to the result binding space.
             // just passing $this->_values in the call_user_func_array()
             // below won't work, you need references.
-            $refs = array();
+            $refs = [];
             foreach ($this->_values as $i => &$f) {
                 $refs[$i] = &$f;
             }
@@ -250,7 +249,7 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
             $this->_stmt->store_result();
             // bind to the result variables
             call_user_func_array(
-                array($this->_stmt, 'bind_result'),
+                [$this->_stmt, 'bind_result'],
                 $this->_values
             );
         }
@@ -290,8 +289,8 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
 
         // dereference the result values, otherwise things like fetchAll()
         // return the same values for every entry (because of the reference).
-        $values = array();
-        foreach ($this->_values as $key => $val) {
+        $values = [];
+        foreach ($this->_values as $val) {
             $values[] = $val;
         }
 
@@ -314,14 +313,12 @@ class Zend_Db_Statement_Mysqli extends Zend_Db_Statement
                 $assoc = array_combine($this->_keys, $values);
                 $row = array_merge($values, $assoc);
                 return $this->_fetchBound($row);
-                break;
             default:
                 /**
                  * @see Zend_Db_Statement_Mysqli_Exception
                  */
                 #require_once 'Zend/Db/Statement/Mysqli/Exception.php';
                 throw new Zend_Db_Statement_Mysqli_Exception("Invalid fetch mode '$style' specified");
-                break;
         }
         return $row;
     }

@@ -64,21 +64,19 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
         'BINARY_DOUBLE'      => Zend_Db::FLOAT_TYPE,
         'BINARY_FLOAT'       => Zend_Db::FLOAT_TYPE,
         'NUMBER'             => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Creates a PDO DSN for the adapter from $this->_config settings.
-     *
-     * @return string
      */
-    protected function _dsn()
+    protected function _dsn(): string
     {
         // baseline of DSN parts
         $dsn = $this->_config;
@@ -143,8 +141,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
      */
     public function listTables()
     {
-        $data = $this->fetchCol('SELECT table_name FROM all_tables');
-        return $data;
+        return $this->fetchCol('SELECT table_name FROM all_tables');
     }
 
     /**
@@ -175,9 +172,8 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         $version = $this->getServerVersion();
         if (($version === null) || version_compare($version, '9.0.0', '>=')) {
@@ -240,9 +236,9 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
         $constraint_type = 10;
         $position        = 11;
 
-        $desc = array();
-        foreach ($result as $key => $row) {
-            list ($primary, $primaryPosition, $identity) = array(false, null, false);
+        $desc = [];
+        foreach ($result as $row) {
+            list ($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$constraint_type] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$position];
@@ -251,14 +247,14 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                  */
                 $identity = false;
             }
-            $desc[$this->foldCase($row[$column_name])] = array(
+            $desc[$this->foldCase($row[$column_name])] = [
                 'SCHEMA_NAME'      => $this->foldCase($row[$owner]),
                 'TABLE_NAME'       => $this->foldCase($row[$table_name]),
                 'COLUMN_NAME'      => $this->foldCase($row[$column_name]),
                 'COLUMN_POSITION'  => $row[$column_id],
                 'DATA_TYPE'        => $row[$data_type],
                 'DEFAULT'          => $row[$data_default],
-                'NULLABLE'         => (bool) ($row[$nullable] == 'Y'),
+                'NULLABLE'         => $row[$nullable] == 'Y',
                 'LENGTH'           => $row[$data_length],
                 'SCALE'            => $row[$data_scale],
                 'PRECISION'        => $row[$data_precision],
@@ -266,7 +262,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -282,8 +278,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
     public function lastSequenceId($sequenceName)
     {
         $this->_connect();
-        $value = $this->fetchOne('SELECT '.$this->quoteIdentifier($sequenceName, true).'.CURRVAL FROM dual');
-        return $value;
+        return $this->fetchOne('SELECT '.$this->quoteIdentifier($sequenceName, true).'.CURRVAL FROM dual');
     }
 
     /**
@@ -297,8 +292,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
     public function nextSequenceId($sequenceName)
     {
         $this->_connect();
-        $value = $this->fetchOne('SELECT '.$this->quoteIdentifier($sequenceName, true).'.NEXTVAL FROM dual');
-        return $value;
+        return $this->fetchOne('SELECT '.$this->quoteIdentifier($sequenceName, true).'.NEXTVAL FROM dual');
     }
 
     /**
@@ -340,9 +334,8 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
      * @param integer $count
      * @param integer $offset
      * @throws Zend_Db_Adapter_Exception
-     * @return string
      */
-    public function limit($sql, $count, $offset = 0)
+    public function limit($sql, $count, $offset = 0): string
     {
         $count = intval($count);
         if ($count <= 0) {

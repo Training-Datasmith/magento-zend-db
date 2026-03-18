@@ -83,7 +83,7 @@ class Zend_Db_Profiler
      *
      * @var array
      */
-    protected $_queryProfiles = array();
+    protected $_queryProfiles = [];
 
     /**
      * Stores enabled state of the profiler.  If set to False, calls to
@@ -101,7 +101,7 @@ class Zend_Db_Profiler
      *
      * @var integer
      */
-    protected $_filterElapsedSecs = null;
+    protected $_filterElapsedSecs;
 
     /**
      * Logical OR of any of the filter constants.  NULL if filtering by query
@@ -112,14 +112,13 @@ class Zend_Db_Profiler
      *
      * @var integer
      */
-    protected $_filterTypes = null;
+    protected $_filterTypes;
 
     /**
      * Class constructor.  The profiler is disabled by default unless it is
      * specifically enabled by passing in $enabled here or calling setEnabled().
      *
      * @param  boolean $enabled
-     * @return void
      */
     public function __construct($enabled = false)
     {
@@ -133,7 +132,7 @@ class Zend_Db_Profiler
      * @param  boolean $enable
      * @return Zend_Db_Profiler Provides a fluent interface
      */
-    public function setEnabled($enable)
+    public function setEnabled($enable): self
     {
         $this->_enabled = (bool) $enable;
 
@@ -160,7 +159,7 @@ class Zend_Db_Profiler
      * @param  integer $minimumSeconds OPTIONAL
      * @return Zend_Db_Profiler Provides a fluent interface
      */
-    public function setFilterElapsedSecs($minimumSeconds = null)
+    public function setFilterElapsedSecs($minimumSeconds = null): self
     {
         if (null === $minimumSeconds) {
             $this->_filterElapsedSecs = null;
@@ -191,7 +190,7 @@ class Zend_Db_Profiler
      * @param  integer $queryTypes OPTIONAL
      * @return Zend_Db_Profiler Provides a fluent interface
      */
-    public function setFilterQueryType($queryTypes = null)
+    public function setFilterQueryType($queryTypes = null): self
     {
         $this->_filterTypes = $queryTypes;
 
@@ -217,9 +216,9 @@ class Zend_Db_Profiler
      *
      * @return Zend_Db_Profiler Provides a fluent interface
      */
-    public function clear()
+    public function clear(): self
     {
-        $this->_queryProfiles = array();
+        $this->_queryProfiles = [];
 
         return $this;
     }
@@ -227,7 +226,6 @@ class Zend_Db_Profiler
     /**
      * Clone a profiler query
      *
-     * @param  Zend_Db_Profiler_Query $query
      * @return integer or null
      */
     public function queryClone(Zend_Db_Profiler_Query $query)
@@ -296,7 +294,7 @@ class Zend_Db_Profiler
      * @throws Zend_Db_Profiler_Exception
      * @return string   Inform that a query is stored or ignored.
      */
-    public function queryEnd($queryId)
+    public function queryEnd($queryId): string
     {
         // Don't do anything if the Zend_Db_Profiler is not enabled.
         if (!$this->_enabled) {
@@ -382,7 +380,7 @@ class Zend_Db_Profiler
      */
     public function getQueryProfiles($queryType = null, $showUnfinished = false)
     {
-        $queryProfiles = array();
+        $queryProfiles = [];
         foreach ($this->_queryProfiles as $key => $qp) {
             if ($queryType === null) {
                 $condition = true;
@@ -396,7 +394,7 @@ class Zend_Db_Profiler
         }
 
         if (empty($queryProfiles)) {
-            $queryProfiles = false;
+            return false;
         }
 
         return $queryProfiles;
@@ -414,7 +412,7 @@ class Zend_Db_Profiler
     public function getTotalElapsedSecs($queryType = null)
     {
         $elapsedSecs = 0;
-        foreach ($this->_queryProfiles as $key => $qp) {
+        foreach ($this->_queryProfiles as $qp) {
             if (null === $queryType) {
                 $condition = true;
             } else {
@@ -433,9 +431,8 @@ class Zend_Db_Profiler
      * that type will be counted.
      *
      * @param  integer $queryType OPTIONAL
-     * @return integer
      */
-    public function getTotalNumQueries($queryType = null)
+    public function getTotalNumQueries($queryType = null): int
     {
         if (null === $queryType) {
             return count($this->_queryProfiles);

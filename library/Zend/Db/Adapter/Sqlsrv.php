@@ -50,11 +50,11 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      *
      * @var array
      */
-    protected $_config = array(
+    protected $_config = [
         'dbname'       => null,
         'username'     => null,
         'password'     => null,
-    );
+    ];
 
     /**
      * Last insert id from INSERT query
@@ -81,7 +81,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -95,7 +95,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE,
         'SMALLMONEY'         => Zend_Db::FLOAT_TYPE,
-    );
+    ];
 
     /**
      * Default class name for a DB statement.
@@ -131,16 +131,16 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
             $serverName .= ', ' . $port;
         }
 
-        $connectionInfo = array(
+        $connectionInfo = [
             'Database' => $this->_config['dbname'],
-        );
+        ];
 
         if (isset($this->_config['username']) && isset($this->_config['password']))
         {
-            $connectionInfo += array(
+            $connectionInfo += [
                 'UID'      => $this->_config['username'],
                 'PWD'      => $this->_config['password'],
-            );
+            ];
         }
         // else - windows authentication
 
@@ -173,7 +173,6 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      * Check for config options that are mandatory.
      * Throw exceptions if any are missing.
      *
-     * @param array $config
      * @throws Zend_Db_Adapter_Exception
      */
     protected function _checkRequiredOptions(array $config)
@@ -211,7 +210,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      * @return true
      * @throws Zend_Db_Adapter_Sqlsrv_Exception
      */
-    public function setTransactionIsolationLevel($level = null)
+    public function setTransactionIsolationLevel($level = null): bool
     {
         $this->_connect();
         $sql = null;
@@ -253,10 +252,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
 
     /**
      * Test if a connection is active
-     *
-     * @return boolean
      */
-    public function isConnected()
+    public function isConnected(): bool
     {
         return (is_resource($this->_connection)
                 && (get_resource_type($this->_connection) == 'SQL Server Connection')
@@ -282,7 +279,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      * @param string $sql The SQL statement with placeholders.
      * @return Zend_Db_Statement_Sqlsrv
      */
-    public function prepare($sql)
+    public function prepare($sql): object
     {
         $this->_connect();
         $stmtClass = $this->_defaultStmtClass;
@@ -310,7 +307,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
     {
         if (is_int($value)) {
             return $value;
-        } elseif (is_float($value)) {
+        }
+        if (is_float($value)) {
             return sprintf('%F', $value);
         }
 
@@ -330,9 +328,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      *
      * @param string $tableName   OPTIONAL Name of table.
      * @param string $primaryKey  OPTIONAL Name of primary key column.
-     * @return string
      */
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function lastInsertId($tableName = null, $primaryKey = null): string
     {
         if ($tableName) {
             $tableName = $this->quote($tableName);
@@ -358,8 +355,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
     public function insert($table, array $bind)
     {
         // extract and quote col names from the array keys
-        $cols = array();
-        $vals = array();
+        $cols = [];
+        $vals = [];
         foreach ($bind as $col => $val) {
             $cols[] = $this->quoteIdentifier($col, true);
             if ($val instanceof Zend_Db_Expr) {
@@ -428,9 +425,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         /**
          * Discover metadata information about this table.
@@ -443,7 +439,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         $stmt->closeCursor();
 
         if (count($result) == 0) {
-            return array();
+            return [];
         }
 
         $owner           = 1;
@@ -466,7 +462,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
         $stmt       = $this->query($sql);
 
         $primaryKeysResult = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-        $primaryKeyColumn  = array();
+        $primaryKeyColumn  = [];
 
         // Per http://msdn.microsoft.com/en-us/library/ms189813.aspx,
         // results from sp_keys stored procedure are:
@@ -478,9 +474,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
             $primaryKeyColumn[$pkeysRow[$pkey_column_name]] = $pkeysRow[$pkey_key_seq];
         }
 
-        $desc = array();
-        $p    = 1;
-        foreach ($result as $key => $row) {
+        $desc = [];
+        foreach ($result as $row) {
             $identity = false;
             $words    = explode(' ', $row[$type_name], 2);
             if (isset($words[0])) {
@@ -497,7 +492,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
                 $primaryPosition = null;
             }
 
-            $desc[$this->foldCase($row[$column_name])] = array(
+            $desc[$this->foldCase($row[$column_name])] = [
                 'SCHEMA_NAME'      => null, // @todo
                 'TABLE_NAME'       => $this->foldCase($row[$table_name]),
                 'COLUMN_NAME'      => $this->foldCase($row[$column_name]),
@@ -512,7 +507,7 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
                 'PRIMARY'          => $isPrimary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity,
-            );
+            ];
         }
 
         return $desc;
@@ -581,11 +576,9 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
             case Zend_Db::FETCH_BOUND: // bound to PHP variable
                 #require_once 'Zend/Db/Adapter/Sqlsrv/Exception.php';
                 throw new Zend_Db_Adapter_Sqlsrv_Exception('FETCH_BOUND is not supported yet');
-                break;
             default:
                 #require_once 'Zend/Db/Adapter/Sqlsrv/Exception.php';
                 throw new Zend_Db_Adapter_Sqlsrv_Exception("Invalid fetch mode '$mode' specified");
-                break;
         }
     }
 
@@ -648,9 +641,8 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
      * Check if the adapter supports real SQL parameters.
      *
      * @param string $type 'positional' or 'named'
-     * @return bool
      */
-    public function supportsParameters($type)
+    public function supportsParameters($type): bool
     {
         if ($type == 'positional') {
             return true;
@@ -669,11 +661,6 @@ class Zend_Db_Adapter_Sqlsrv extends Zend_Db_Adapter_Abstract
     {
         $this->_connect();
         $serverInfo = sqlsrv_server_info($this->_connection);
-
-        if ($serverInfo !== false) {
-            return $serverInfo['SQLServerVersion'];
-        }
-
-        return null;
+        return $serverInfo['SQLServerVersion'];
     }
 }

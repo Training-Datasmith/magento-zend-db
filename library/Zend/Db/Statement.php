@@ -45,12 +45,12 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
     /**
      * @var resource|object The driver level statement object/resource
      */
-    protected $_stmt = null;
+    protected $_stmt;
 
     /**
      * @var Zend_Db_Adapter_Abstract
      */
-    protected $_adapter = null;
+    protected $_adapter;
 
     /**
      * The current fetch mode.
@@ -97,7 +97,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
     /**
      * @var Zend_Db_Profiler_Query
      */
-    protected $_queryId = null;
+    protected $_queryId;
 
     /**
      * Constructor for a statement.
@@ -125,7 +125,6 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      */
     protected function _prepare($sql)
     {
-        return;
     }
 
     /**
@@ -147,7 +146,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
 
         // map params
         $this->_sqlParam = [];
-        foreach ($this->_sqlSplit as $key => $val) {
+        foreach ($this->_sqlSplit as $val) {
             if ($val == '?') {
                 if ($this->_adapter->supportsParameters('positional') === false) {
                     /**
@@ -346,7 +345,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      */
     public function fetchAll($style = null, $col = null)
     {
-        $data = array();
+        $data = [];
         if ($style === Zend_Db::FETCH_COLUMN && $col === null) {
             $col = 0;
         }
@@ -370,7 +369,6 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      */
     public function fetchColumn($col = 0)
     {
-        $data = array();
         $col = (int) $col;
         $row = $this->fetch(Zend_Db::FETCH_NUM);
         if (!is_array($row)) {
@@ -386,7 +384,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param array  $config OPTIONAL Constructor arguments for the class.
      * @return mixed One object instance of the specified class, or false.
      */
-    public function fetchObject($class = 'stdClass', array $config = array())
+    public function fetchObject($class = 'stdClass', array $config = [])
     {
         $obj = new $class($config);
         $row = $this->fetch(Zend_Db::FETCH_ASSOC);
@@ -448,7 +446,6 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                  */
                 #require_once 'Zend/Db/Statement/Exception.php';
                 throw new Zend_Db_Statement_Exception('invalid fetch mode');
-                break;
         }
     }
 

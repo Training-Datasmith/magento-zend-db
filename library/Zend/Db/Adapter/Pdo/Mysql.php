@@ -57,7 +57,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -74,7 +74,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
         'FIXED'              => Zend_Db::FLOAT_TYPE,
         'FLOAT'              => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Override _dsn() and ensure that charset is incorporated in mysql
@@ -111,10 +111,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         parent::_connect();
     }
 
-    /**
-     * @return string
-     */
-    public function getQuoteIdentifierSymbol()
+    public function getQuoteIdentifierSymbol(): string
     {
         return "`";
     }
@@ -155,9 +152,8 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         // @todo  use INFORMATION_SCHEMA someday when MySQL's
         // implementation has reasonably good performance and
@@ -180,12 +176,12 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         $default = 4;
         $extra   = 5;
 
-        $desc = array();
+        $desc = [];
         $i = 1;
         $p = 1;
         foreach ($result as $row) {
             list($length, $scale, $precision, $unsigned, $primary, $primaryPosition, $identity)
-                = array(null, null, null, null, false, null, false);
+                = [null, null, null, null, false, null, false];
             if (preg_match('/unsigned/', $row[$type])) {
                 $unsigned = true;
             }
@@ -215,14 +211,14 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 }
                 ++$p;
             }
-            $desc[$this->foldCase($row[$field])] = array(
+            $desc[$this->foldCase($row[$field])] = [
                 'SCHEMA_NAME'      => null, // @todo
                 'TABLE_NAME'       => $this->foldCase($tableName),
                 'COLUMN_NAME'      => $this->foldCase($row[$field]),
                 'COLUMN_POSITION'  => $i,
                 'DATA_TYPE'        => $row[$type],
                 'DEFAULT'          => $row[$default],
-                'NULLABLE'         => (bool) ($row[$null] == 'YES'),
+                'NULLABLE'         => $row[$null] == 'YES',
                 'LENGTH'           => $length,
                 'SCALE'            => $scale,
                 'PRECISION'        => $precision,
@@ -230,22 +226,21 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
             ++$i;
         }
         return $desc;
     }
 
     /**
-     * Adds an adapter-specific LIMIT clause to the SELECT statement.
-     *
-     * @param  string $sql
-     * @param  integer $count
-     * @param  integer $offset OPTIONAL
-     * @throws Zend_Db_Adapter_Exception
-     * @return string
-     */
-     public function limit($sql, $count, $offset = 0)
+      * Adds an adapter-specific LIMIT clause to the SELECT statement.
+      *
+      * @param  string $sql
+      * @param  integer $count
+      * @param  integer $offset OPTIONAL
+      * @throws Zend_Db_Adapter_Exception
+      */
+     public function limit($sql, $count, $offset = 0): string
      {
         $count = intval($count);
         if ($count <= 0) {

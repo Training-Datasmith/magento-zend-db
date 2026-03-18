@@ -50,31 +50,29 @@ class Zend_Db_Profiler_Query
      *
      * @var float
      */
-    protected $_startedMicrotime = null;
+    protected $_startedMicrotime;
 
     /**
      * Unix timestamp with microseconds when self::queryEnd() was called.
      *
      * @var integer
      */
-    protected $_endedMicrotime = null;
+    protected $_endedMicrotime;
 
     /**
      * @var array
      */
-    protected $_boundParams = array();
+    protected $_boundParams = [];
 
     /**
      * @var array
      */
-
     /**
      * Class constructor.  A query is about to be started, save the query text ($query) and its
      * type (one of the Zend_Db_Profiler::* constants).
      *
      * @param  string  $query
      * @param  integer $queryType
-     * @return void
      */
     public function __construct($query, $queryType)
     {
@@ -86,11 +84,10 @@ class Zend_Db_Profiler_Query
 
     /**
      * Clone handler for the query object.
-     * @return void
      */
     public function __clone()
     {
-        $this->_boundParams = array();
+        $this->_boundParams = [];
         $this->_endedMicrotime = null;
         $this->start();
     }
@@ -120,10 +117,8 @@ class Zend_Db_Profiler_Query
 
     /**
      * Returns true if and only if the query has ended.
-     *
-     * @return boolean
      */
-    public function hasEnded()
+    public function hasEnded(): bool
     {
         return $this->_endedMicrotime !== null;
     }

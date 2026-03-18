@@ -35,7 +35,7 @@ class Zend_Db_Table_Definition
     /**
      * @var array
      */
-    protected $_tableConfigs = array();
+    protected $_tableConfigs = [];
 
     /**
      * __construct()
@@ -53,11 +53,8 @@ class Zend_Db_Table_Definition
 
     /**
      * setConfig()
-     *
-     * @param Zend_Config $config
-     * @return Zend_Db_Table_Definition
      */
-    public function setConfig(Zend_Config $config)
+    public function setConfig(Zend_Config $config): self
     {
         $this->setOptions($config->toArray());
         return $this;
@@ -65,11 +62,8 @@ class Zend_Db_Table_Definition
 
     /**
      * setOptions()
-     *
-     * @param array $options
-     * @return Zend_Db_Table_Definition
      */
-    public function setOptions(Array $options)
+    public function setOptions(Array $options): self
     {
         foreach ($options as $optionName => $optionValue) {
             $this->setTableConfig($optionName, $optionValue);
@@ -79,10 +73,8 @@ class Zend_Db_Table_Definition
 
     /**
      * @param string $tableName
-     * @param array  $tableConfig
-     * @return Zend_Db_Table_Definition
      */
-    public function setTableConfig($tableName, array $tableConfig)
+    public function setTableConfig($tableName, array $tableConfig): self
     {
         // @todo logic here
         $tableConfig[Zend_Db_Table::DEFINITION_CONFIG_NAME] = $tableName;
@@ -121,9 +113,8 @@ class Zend_Db_Table_Definition
      * hasTableConfig()
      *
      * @param string $tableName
-     * @return bool
      */
-    public function hasTableConfig($tableName)
+    public function hasTableConfig($tableName): bool
     {
         return (isset($this->_tableConfigs[$tableName]));
     }

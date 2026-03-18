@@ -51,12 +51,12 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * persistent => (boolean) Set TRUE to use a persistent connection
      * @var array
      */
-    protected $_config = array(
+    protected $_config = [
         'dbname'       => null,
         'username'     => null,
         'password'     => null,
         'persistent'   => false
-    );
+    ];
 
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
@@ -69,19 +69,19 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
         'BINARY_DOUBLE'      => Zend_Db::FLOAT_TYPE,
         'BINARY_FLOAT'       => Zend_Db::FLOAT_TYPE,
         'NUMBER'             => Zend_Db::FLOAT_TYPE,
-    );
+    ];
 
     /**
      * @var integer
      */
-    protected $_execute_mode = null;
+    protected $_execute_mode;
 
     /**
      * Default class name for a DB statement.
@@ -96,7 +96,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      *
      * @var boolean
      */
-    protected $_lobAsString = null;
+    protected $_lobAsString;
 
     /**
      * Creates a connection resource.
@@ -141,14 +141,12 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
 
     /**
      * Test if a connection is active
-     *
-     * @return boolean
      */
-    public function isConnected()
+    public function isConnected(): bool
     {
-        return ((bool) (is_resource($this->_connection)
+        return (is_resource($this->_connection)
                     && (get_resource_type($this->_connection) == 'oci8 connection'
-                     || get_resource_type($this->_connection) == 'oci8 persistent connection')));
+                     || get_resource_type($this->_connection) == 'oci8 persistent connection'));
         }
 
     /**
@@ -168,9 +166,8 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * Activate/deactivate return of LOB as string
      *
      * @param string $lob_as_string
-     * @return Zend_Db_Adapter_Oracle
      */
-    public function setLobAsString($lobAsString)
+    public function setLobAsString($lobAsString): self
     {
         $this->_lobAsString = (bool) $lobAsString;
         return $this;
@@ -201,7 +198,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * @param string $sql The SQL statement with placeholders.
      * @return Zend_Db_Statement_Oracle
      */
-    public function prepare($sql)
+    public function prepare($sql): object
     {
         $this->_connect();
         $stmtClass = $this->_defaultStmtClass;
@@ -258,8 +255,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     {
         $this->_connect();
         $sql = 'SELECT '.$this->quoteIdentifier($sequenceName, true).'.CURRVAL FROM dual';
-        $value = $this->fetchOne($sql);
-        return $value;
+        return $this->fetchOne($sql);
     }
 
     /**
@@ -274,8 +270,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     {
         $this->_connect();
         $sql = 'SELECT '.$this->quoteIdentifier($sequenceName, true).'.NEXTVAL FROM dual';
-        $value = $this->fetchOne($sql);
-        return $value;
+        return $this->fetchOne($sql);
     }
 
     /**
@@ -318,8 +313,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     public function listTables()
     {
         $this->_connect();
-        $data = $this->fetchCol('SELECT table_name FROM all_tables');
-        return $data;
+        return $this->fetchCol('SELECT table_name FROM all_tables');
     }
 
     /**
@@ -350,9 +344,8 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         $version = $this->getServerVersion();
         if (($version === null) || version_compare($version, '9.0.0', '>=')) {
@@ -415,9 +408,9 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
         $constraint_type = 10;
         $position        = 11;
 
-        $desc = array();
-        foreach ($result as $key => $row) {
-            list ($primary, $primaryPosition, $identity) = array(false, null, false);
+        $desc = [];
+        foreach ($result as $row) {
+            list ($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$constraint_type] == 'P') {
                 $primary = true;
                 $primaryPosition = $row[$position];
@@ -426,14 +419,14 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                  */
                 $identity = false;
             }
-            $desc[$this->foldCase($row[$column_name])] = array(
+            $desc[$this->foldCase($row[$column_name])] = [
                 'SCHEMA_NAME'      => $this->foldCase($row[$owner]),
                 'TABLE_NAME'       => $this->foldCase($row[$table_name]),
                 'COLUMN_NAME'      => $this->foldCase($row[$column_name]),
                 'COLUMN_POSITION'  => $row[$column_id],
                 'DATA_TYPE'        => $row[$data_type],
                 'DEFAULT'          => $row[$data_default],
-                'NULLABLE'         => (bool) ($row[$nullable] == 'Y'),
+                'NULLABLE'         => $row[$nullable] == 'Y',
                 'LENGTH'           => $row[$data_length],
                 'SCALE'            => $row[$data_scale],
                 'PRECISION'        => $row[$data_precision],
@@ -441,7 +434,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -516,14 +509,12 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                  */
                 #require_once 'Zend/Db/Adapter/Oracle/Exception.php';
                 throw new Zend_Db_Adapter_Oracle_Exception('FETCH_BOUND is not supported yet');
-                break;
             default:
                 /**
                  * @see Zend_Db_Adapter_Oracle_Exception
                  */
                 #require_once 'Zend/Db/Adapter/Oracle/Exception.php';
                 throw new Zend_Db_Adapter_Oracle_Exception("Invalid fetch mode '$mode' specified");
-                break;
         }
     }
 
@@ -533,10 +524,9 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * @param string $sql
      * @param integer $count
      * @param integer $offset OPTIONAL
-     * @return string
      * @throws Zend_Db_Adapter_Oracle_Exception
      */
-    public function limit($sql, $count, $offset = 0)
+    public function limit($sql, $count, $offset = 0): string
     {
         $count = intval($count);
         if ($count <= 0) {
@@ -574,10 +564,9 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     }
 
     /**
-     * @param integer $mode
      * @throws Zend_Db_Adapter_Oracle_Exception
      */
-    private function _setExecuteMode($mode)
+    private function _setExecuteMode(int $mode)
     {
         switch($mode) {
             case OCI_COMMIT_ON_SUCCESS:
@@ -591,7 +580,6 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                  */
                 #require_once 'Zend/Db/Adapter/Oracle/Exception.php';
                 throw new Zend_Db_Adapter_Oracle_Exception("Invalid execution mode '$mode' specified");
-                break;
         }
     }
 
@@ -607,9 +595,8 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * Check if the adapter supports real SQL parameters.
      *
      * @param string $type 'positional' or 'named'
-     * @return bool
      */
-    public function supportsParameters($type)
+    public function supportsParameters($type): bool
     {
         switch ($type) {
             case 'named':
@@ -633,11 +620,9 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
             $matches = null;
             if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $version, $matches)) {
                 return $matches[1];
-            } else {
-                return null;
             }
-        } else {
             return null;
         }
+        return null;
     }
 }

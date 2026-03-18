@@ -55,7 +55,6 @@ class Zend_Db_Statement_Sqlsrv_Exception extends Zend_Db_Statement_Exception
             $code    = (int)    $message['code'];
             $message = (string) $message['message'];
        }
-       parent::__construct($message, $code);
    }
 }
 

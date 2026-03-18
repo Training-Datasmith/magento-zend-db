@@ -40,7 +40,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
     /**
      * @var Zend_Db_Adapter_Abstract
      */
-    protected $_adapter = null;
+    protected $_adapter;
 
     /**
      * Construct the data server class.
@@ -73,9 +73,8 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         // this is still a work in progress
 
@@ -91,7 +90,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
         }
         $sql .= " ORDER BY c.colno";
 
-        $desc = array();
+        $desc = [];
         $stmt = $this->_adapter->query($sql);
 
         $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
@@ -111,7 +110,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
 
         $primaryCols = null;
 
-        foreach ($result as $key => $row) {
+        foreach ($result as $row) {
             $primary = false;
             $primaryPosition = null;
 
@@ -130,14 +129,14 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
                 $identity = true;
             }
 
-            $desc[$this->_adapter->foldCase($row[$colname])] = array (
+            $desc[$this->_adapter->foldCase($row[$colname])] =  [
                 'SCHEMA_NAME'       => $this->_adapter->foldCase($row[$tabschema]),
                 'TABLE_NAME'        => $this->_adapter->foldCase($row[$tabname]),
                 'COLUMN_NAME'       => $this->_adapter->foldCase($row[$colname]),
                 'COLUMN_POSITION'   => $row[$colno],
                 'DATA_TYPE'         => $this->_getDataType($row[$typename]),
                 'DEFAULT'           => $row[$default],
-                'NULLABLE'          => (bool) !($row[$typename] - 256 >= 0),
+                'NULLABLE'          => !($row[$typename] - 256 >= 0),
                 'LENGTH'            => $row[$length],
                 'SCALE'             => ($row[$typename] == 5 ? $row[$length]&255 : 0),
                 'PRECISION'         => ($row[$typename] == 5 ? (int)($row[$length]/256) : 0),
@@ -145,7 +144,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
                 'PRIMARY'           => $primary,
                 'PRIMARY_POSITION'  => $primaryPosition,
                 'IDENTITY'          => $identity
-            );
+            ];
         }
 
         return $desc;
@@ -156,11 +155,10 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
      * to a string
      *
      * @param int $typeNo
-     * @return string
      */
-    protected function _getDataType($typeNo)
+    protected function _getDataType($typeNo): string
     {
-        $typemap = array(
+        $typemap = [
             0       => "CHAR",
             1       => "SMALLINT",
             2       => "INTEGER",
@@ -186,7 +184,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
             22      => "Unnamed ROW",
             40      => "Variable-length opaque type",
             4118    => "Named ROW"
-        );
+        ];
 
         if ($typeNo - 256 >= 0) {
             $typeNo = $typeNo - 256;
@@ -214,7 +212,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
         $stmt = $this->_adapter->query($sql);
         $results = $stmt->fetchAll();
 
-        $cols = array();
+        $cols = [];
 
         // this should return only 1 row
         // unless there is no primary key,
@@ -226,13 +224,12 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
         }
 
         $position = 0;
-        foreach ($row as $key => $colno) {
+        foreach ($row as $colno) {
             $position++;
             if ($colno == 0) {
                 return $cols;
-            } else {
-                $cols[$colno] = $position;
             }
+            $cols[$colno] = $position;
         }
     }
 
@@ -252,7 +249,8 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
-        } else if ($count == 0) {
+        }
+        if ($count == 0) {
               $limit_sql = str_ireplace("SELECT", "SELECT * FROM (SELECT", $sql);
               $limit_sql .= ") WHERE 0 = 1";
         } else {
@@ -281,8 +279,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
     {
         $sql = 'SELECT '.$this->_adapter->quoteIdentifier($sequenceName).'.CURRVAL FROM '
                .'systables WHERE tabid = 1';
-        $value = $this->_adapter->fetchOne($sql);
-        return $value;
+        return $this->_adapter->fetchOne($sql);
     }
 
      /**
@@ -295,7 +292,6 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
     {
         $sql = 'SELECT '.$this->_adapter->quoteIdentifier($sequenceName).'.NEXTVAL FROM '
                .'systables WHERE tabid = 1';
-        $value = $this->_adapter->fetchOne($sql);
-        return $value;
+        return $this->_adapter->fetchOne($sql);
     }
 }

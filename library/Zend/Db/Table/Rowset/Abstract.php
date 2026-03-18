@@ -34,7 +34,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
      *
      * @var array
      */
-    protected $_data = array();
+    protected $_data = [];
 
     /**
      * Zend_Db_Table_Abstract object.
@@ -85,7 +85,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
      *
      * @var array
      */
-    protected $_rows = array();
+    protected $_rows = [];
 
     /**
      * @var boolean
@@ -99,8 +99,6 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
 
     /**
      * Constructor.
-     *
-     * @param array $config
      */
     public function __construct(array $config)
     {
@@ -138,8 +136,8 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
      */
     public function __sleep()
     {
-        return array('_data', '_tableClass', '_rowClass', '_pointer', '_count', '_rows', '_stored',
-                     '_readOnly');
+        return ['_data', '_tableClass', '_rowClass', '_pointer', '_count', '_rows', '_stored',
+                     '_readOnly'];
     }
 
     /**
@@ -189,7 +187,6 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
      * Set the table object, to re-establish a live connection
      * to the database for a Rowset that has been de-serialized.
      *
-     * @param Zend_Db_Table_Abstract $table
      * @return boolean
      * @throws Zend_Db_Table_Row_Exception
      */
@@ -420,12 +417,12 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
         // do we already have a row object for this position?
         if (empty($this->_rows[$position])) {
             $this->_rows[$position] = new $this->_rowClass(
-                array(
+                [
                     'table'    => $this->_table,
                     'data'     => $this->_data[$position],
                     'stored'   => $this->_stored,
                     'readOnly' => $this->_readOnly
-                )
+                ]
             );
 
             if ( $this->_table instanceof Zend_Db_Table_Abstract ) {

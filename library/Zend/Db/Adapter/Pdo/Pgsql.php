@@ -57,7 +57,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -70,7 +70,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Creates a PDO object and connects to the database.
@@ -144,9 +144,8 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param  string $tableName
      * @param  string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         $sql = "SELECT
                 a.attnum,
@@ -184,7 +183,6 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         $relname       = 2;
         $colname       = 3;
         $type          = 4;
-        $atttypemod    = 5;
         $complete_type = 6;
         $default_value = 7;
         $notnull       = 8;
@@ -192,8 +190,8 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         $contype       = 10;
         $conkey        = 11;
 
-        $desc = array();
-        foreach ($result as $key => $row) {
+        $desc = [];
+        foreach ($result as $row) {
             $defaultValue = $row[$default_value];
             if ($row[$type] == 'varchar' || $row[$type] == 'bpchar' ) {
                 if (preg_match('/character(?: varying)?(?:\((\d+)\))?/', $row[$complete_type], $matches)) {
@@ -207,20 +205,20 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                     $defaultValue = $matches[1];
                 }
             }
-            list($primary, $primaryPosition, $identity) = array(false, null, false);
+            list($primary, $primaryPosition, $identity) = [false, null, false];
             if ($row[$contype] == 'p') {
                 $primary = true;
                 $primaryPosition = array_search($row[$attnum], explode(',', $row[$conkey])) + 1;
                 $identity = (bool) (preg_match('/^nextval/', $row[$default_value]));
             }
-            $desc[$this->foldCase($row[$colname])] = array(
+            $desc[$this->foldCase($row[$colname])] = [
                 'SCHEMA_NAME'      => $this->foldCase($row[$nspname]),
                 'TABLE_NAME'       => $this->foldCase($row[$relname]),
                 'COLUMN_NAME'      => $this->foldCase($row[$colname]),
                 'COLUMN_POSITION'  => $row[$attnum],
                 'DATA_TYPE'        => $row[$type],
                 'DEFAULT'          => $defaultValue,
-                'NULLABLE'         => (bool) ($row[$notnull] != 't'),
+                'NULLABLE'         => $row[$notnull] != 't',
                 'LENGTH'           => $row[$length],
                 'SCALE'            => null, // @todo
                 'PRECISION'        => null, // @todo
@@ -228,7 +226,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -240,9 +238,8 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $sql
      * @param integer $count
      * @param integer $offset OPTIONAL
-     * @return string
      */
-    public function limit($sql, $count, $offset = 0)
+    public function limit($sql, $count, $offset = 0): string
     {
         $count = intval($count);
         if ($count <= 0) {
@@ -282,10 +279,9 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
         $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        $value = $this->fetchOne("SELECT CURRVAL("
+        return $this->fetchOne("SELECT CURRVAL("
                . $this->quote($this->quoteIdentifier($sequenceName, true))
                . ")");
-        return $value;
     }
 
     /**
@@ -300,10 +296,9 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
     {
         $this->_connect();
         $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        $value = $this->fetchOne("SELECT NEXTVAL("
+        return $this->fetchOne("SELECT NEXTVAL("
                . $this->quote($this->quoteIdentifier($sequenceName, true))
                . ")");
-        return $value;
     }
 
     /**

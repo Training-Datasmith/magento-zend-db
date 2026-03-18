@@ -55,7 +55,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var string
      */
-    protected $_serverType = null;
+    protected $_serverType;
 
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
@@ -68,7 +68,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
                         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
                         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
                         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -81,7 +81,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
                         'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
                         'FLOAT'              => Zend_Db::FLOAT_TYPE
-                        );
+                        ];
 
     /**
      * Creates a PDO object and connects to the database.
@@ -135,18 +135,15 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
             $error = strpos($e->getMessage(), 'driver does not support that attribute');
             if ($error) {
                 throw new Zend_Db_Adapter_Exception("PDO_IBM driver extension is downlevel.  Please use driver release version 1.2.1 or later", 0, $e);
-            } else {
-                throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
             }
+            throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Creates a PDO DSN for the adapter from $this->_config settings.
-     *
-     * @return string
      */
-    protected function _dsn()
+    protected function _dsn(): string
     {
         $this->_checkRequiredOptions($this->_config);
 
@@ -167,7 +164,6 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     /**
      * Checks required options
      *
-     * @param  array $config
      * @throws Zend_Db_Adapter_Exception
      * @return void
      */
@@ -190,7 +186,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * @param array $bind An array of data to bind to the placeholders.
      * @return PDOStatement
      */
-    public function prepare($sql)
+    public function prepare($sql): object
     {
         $this->_connect();
         $stmtClass = $this->_defaultStmtClass;
@@ -257,7 +253,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     public function insert($table, array $bind)
     {
         $this->_connect();
-        $newbind = array();
+        $newbind = [];
         if (is_array($bind)) {
             foreach ($bind as $name => $value) {
                 if($value !== null) {
@@ -304,9 +300,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
             return $this->lastSequenceId($sequenceName);
         }
 
-        $id = $this->getConnection()->lastInsertId();
-
-        return $id;
+        return $this->getConnection()->lastInsertId();
     }
 
     /**
@@ -348,9 +342,8 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                 $matches = null;
                 if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $result[0][0], $matches)) {
                     return $matches[1];
-                } else {
-                    return null;
                 }
+                return null;
             }
             return null;
         } catch (PDOException $e) {

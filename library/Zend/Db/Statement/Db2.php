@@ -81,10 +81,9 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
      * @param mixed $type      OPTIONAL Datatype of SQL parameter.
      * @param mixed $length    OPTIONAL Length of SQL parameter.
      * @param mixed $options   OPTIONAL Other options.
-     * @return bool
      * @throws Zend_Db_Statement_Db2_Exception
      */
-    public function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null)
+    public function _bindParam($parameter, &$variable, $type = null, $length = null, $options = null): bool
     {
         if ($type === null) {
             $type = DB2_PARAM_IN;
@@ -112,10 +111,8 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
 
     /**
      * Closes the cursor, allowing the statement to be executed again.
-     *
-     * @return bool
      */
-    public function closeCursor()
+    public function closeCursor(): bool
     {
         if (!$this->_stmt) {
             return false;
@@ -177,11 +174,11 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
          * Return three-valued array like PDO.  But DB2 does not distinguish
          * between SQLCODE and native RDBMS error code, so repeat the SQLCODE.
          */
-        return array(
+        return [
             $error,
             $error,
             db2_stmt_errormsg()
-        );
+        ];
     }
 
     /**
@@ -214,7 +211,7 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
                 db2_stmt_error());
         }
 
-        $this->_keys = array();
+        $this->_keys = [];
         if ($field_num = $this->columnCount()) {
             for ($i = 0; $i < $field_num; $i++) {
                 $name = db2_field_name($this->_stmt, $i);
@@ -222,7 +219,7 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
             }
         }
 
-        $this->_values = array();
+        $this->_values = [];
         if ($this->_keys) {
             $this->_values = array_fill(0, count($this->_keys), null);
         }
@@ -274,7 +271,6 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
                  */
                 #require_once 'Zend/Db/Statement/Db2/Exception.php';
                 throw new Zend_Db_Statement_Db2_Exception("Invalid fetch mode '$style' specified");
-                break;
         }
 
         return $row;
@@ -287,10 +283,9 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
      * @param array  $config OPTIONAL Constructor arguments for the class.
      * @return mixed One object instance of the specified class.
      */
-    public function fetchObject($class = 'stdClass', array $config = array())
+    public function fetchObject($class = 'stdClass', array $config = [])
     {
-        $obj = $this->fetch(Zend_Db::FETCH_OBJ);
-        return $obj;
+        return $this->fetch(Zend_Db::FETCH_OBJ);
     }
 
     /**
@@ -343,10 +338,10 @@ class Zend_Db_Statement_Db2 extends Zend_Db_Statement
      * is used, the final result removes the extra column
      * 'zend_db_rownum'
      */
-    public function fetchAll($style = null, $col = null)
+    public function fetchAll($style = null, $col = null): array
     {
         $data = parent::fetchAll($style, $col);
-        $results = array();
+        $results = [];
         $remove = $this->_adapter->foldCase('ZEND_DB_ROWNUM');
 
         foreach ($data as $row) {

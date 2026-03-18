@@ -56,7 +56,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
@@ -70,14 +70,12 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         'NUMERIC'            => Zend_Db::FLOAT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE,
         'SMALLMONEY'         => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Creates a PDO DSN for the adapter from $this->_config settings.
-     *
-     * @return string
      */
-    protected function _dsn()
+    protected function _dsn(): string
     {
         // baseline of DSN parts
         $dsn = $this->_config;
@@ -121,9 +119,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
         foreach ($dsn as $key => $val) {
             $dsn[$key] = "$key=$val";
         }
-
-        $dsn = $this->_pdoType . ':' . implode(';', $dsn);
-        return $dsn;
+        return $this->_pdoType . ':' . implode(';', $dsn);
     }
 
     /**
@@ -144,7 +140,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * It is necessary to override the abstract PDO transaction functions here, as
      * the PDO driver for MSSQL does not support transactions.
      */
-    protected function _beginTransaction()
+    protected function _beginTransaction(): bool
     {
         $this->_connect();
         $this->_connection->exec('BEGIN TRANSACTION');
@@ -157,7 +153,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * It is necessary to override the abstract PDO transaction functions here, as
      * the PDO driver for MSSQL does not support transactions.
      */
-    protected function _commit()
+    protected function _commit(): bool
     {
         $this->_connect();
         $this->_connection->exec('COMMIT TRANSACTION');
@@ -170,7 +166,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * It is necessary to override the abstract PDO transaction functions here, as
      * the PDO driver for MSSQL does not support transactions.
      */
-    protected function _rollBack() {
+    protected function _rollBack(): bool {
         $this->_connect();
         $this->_connection->exec('ROLLBACK TRANSACTION');
         return true;
@@ -216,9 +212,8 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         if ($schemaName != null) {
             if (strpos($schemaName, '.') !== false) {
@@ -257,16 +252,15 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
 
         $stmt = $this->query($sql);
         $primaryKeysResult = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-        $primaryKeyColumn = array();
+        $primaryKeyColumn = [];
         $pkey_column_name = 3;
         $pkey_key_seq = 4;
         foreach ($primaryKeysResult as $pkeysRow) {
             $primaryKeyColumn[$pkeysRow[$pkey_column_name]] = $pkeysRow[$pkey_key_seq];
         }
 
-        $desc = array();
-        $p = 1;
-        foreach ($result as $key => $row) {
+        $desc = [];
+        foreach ($result as $row) {
             $identity = false;
             $words = explode(' ', $row[$type_name], 2);
             if (isset($words[0])) {
@@ -283,7 +277,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 $primaryPosition = null;
             }
 
-            $desc[$this->foldCase($row[$column_name])] = array(
+            $desc[$this->foldCase($row[$column_name])] = [
                 'SCHEMA_NAME'      => null, // @todo
                 'TABLE_NAME'       => $this->foldCase($row[$table_name]),
                 'COLUMN_NAME'      => $this->foldCase($row[$column_name]),
@@ -298,7 +292,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $isPrimary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -342,7 +336,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
             if ($orderby !== false) {
                 $orderParts = explode(',', substr($orderby, 8));
                 $pregReplaceCount = null;
-                $orderbyInverseParts = array();
+                $orderbyInverseParts = [];
                 foreach ($orderParts as $orderPart) {
                     $orderPart = rtrim($orderPart);
                     $inv = preg_replace('/\s+desc$/i', ' ASC', $orderPart, 1, $pregReplaceCount);
@@ -354,9 +348,8 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                     if ($pregReplaceCount) {
                         $orderbyInverseParts[] = $inv;
                         continue;
-                    } else {
-                        $orderbyInverseParts[] = $orderPart . ' DESC';
                     }
+                    $orderbyInverseParts[] = $orderPart . ' DESC';
                 }
 
                 $orderbyInverse = 'ORDER BY ' . implode(', ', $orderbyInverseParts);
@@ -393,10 +386,9 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param string $tableName   OPTIONAL Name of table.
      * @param string $primaryKey  OPTIONAL Name of primary key column.
-     * @return string
      * @throws Zend_Db_Adapter_Exception
      */
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function lastInsertId($tableName = null, $primaryKey = null): int
     {
         $sql = 'SELECT SCOPE_IDENTITY()';
         return (int)$this->fetchOne($sql);

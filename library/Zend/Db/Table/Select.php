@@ -94,7 +94,7 @@ class Zend_Db_Table_Select extends Zend_Db_Select
      * @param Zend_Db_Table_Abstract $adapter
      * @return Zend_Db_Select This Zend_Db_Select object.
      */
-    public function setTable(Zend_Db_Table_Abstract $table)
+    public function setTable(Zend_Db_Table_Abstract $table): self
     {
         $this->_adapter = $table->getAdapter();
         $this->_info    = $table->info();
@@ -112,7 +112,7 @@ class Zend_Db_Table_Select extends Zend_Db_Select
      * @param Zend_Db_Table_Abstract $adapter
      * @return Zend_Db_Select This Zend_Db_Select object.
      */
-    public function setIntegrityCheck($flag = true)
+    public function setIntegrityCheck($flag = true): self
     {
         $this->_integrityCheck = $flag;
         return $this;

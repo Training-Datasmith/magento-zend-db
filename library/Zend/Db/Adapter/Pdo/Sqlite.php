@@ -57,13 +57,13 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = array(
+    protected $_numericDataTypes = [
         Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
         Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
         Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
         'INTEGER'            => Zend_Db::BIGINT_TYPE,
         'REAL'               => Zend_Db::FLOAT_TYPE
-    );
+    ];
 
     /**
      * Constructor.
@@ -81,7 +81,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param array $config An array of configuration keys.
      */
-    public function __construct(array $config = array())
+    public function __construct(array $config = [])
     {
         if (isset($config['sqlite2']) && $config['sqlite2']) {
             $this->_pdoType = 'sqlite2';
@@ -98,7 +98,6 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      * Check for config options that are mandatory.
      * Throw exceptions if any are missing.
      *
-     * @param array $config
      * @throws Zend_Db_Adapter_Exception
      */
     protected function _checkRequiredOptions(array $config)
@@ -114,7 +113,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
     /**
      * DSN builder
      */
-    protected function _dsn()
+    protected function _dsn(): string
     {
         return $this->_pdoType .':'. $this->_config['dbname'];
     }
@@ -193,9 +192,8 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
-     * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describeTable($tableName, $schemaName = null): array
     {
         $sql = 'PRAGMA ';
 
@@ -219,12 +217,12 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
         $dflt_value = 4;
         $pk         = 5;
 
-        $desc = array();
+        $desc = [];
 
         $p = 1;
-        foreach ($result as $key => $row) {
+        foreach ($result as $row) {
             list($length, $scale, $precision, $primary, $primaryPosition, $identity) =
-                array(null, null, null, false, null, false);
+                [null, null, null, false, null, false];
             if (preg_match('/^((?:var)?char)\((\d+)\)/i', $row[$type], $matches)) {
                 $row[$type] = $matches[1];
                 $length = $matches[2];
@@ -239,10 +237,10 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
                 /**
                  * SQLite INTEGER primary key is always auto-increment.
                  */
-                $identity = (bool) ($row[$type] == 'INTEGER');
+                $identity = $row[$type] == 'INTEGER';
                 ++$p;
             }
-            $desc[$this->foldCase($row[$name])] = array(
+            $desc[$this->foldCase($row[$name])] = [
                 'SCHEMA_NAME'      => $this->foldCase($schemaName),
                 'TABLE_NAME'       => $this->foldCase($tableName),
                 'COLUMN_NAME'      => $this->foldCase($row[$name]),
@@ -257,7 +255,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
                 'PRIMARY'          => $primary,
                 'PRIMARY_POSITION' => $primaryPosition,
                 'IDENTITY'         => $identity
-            );
+            ];
         }
         return $desc;
     }
@@ -268,9 +266,8 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $sql
      * @param integer $count
      * @param integer $offset OPTIONAL
-     * @return string
      */
-    public function limit($sql, $count, $offset = 0)
+    public function limit($sql, $count, $offset = 0): string
     {
         $count = intval($count);
         if ($count <= 0) {

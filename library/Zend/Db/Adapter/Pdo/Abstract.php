@@ -157,7 +157,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
      */
     public function isConnected()
     {
-        return ((bool) ($this->_connection instanceof PDO));
+        return ($this->_connection instanceof PDO);
     }
 
     /**
@@ -222,7 +222,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
      * @return Zend_Db_Statement_Pdo
      * @throws Zend_Db_Adapter_Exception To re-throw PDOException.
      */
-    public function query($sql, $bind = array())
+    public function query($sql, $bind = [])
     {
         if (empty($bind) && $sql instanceof Zend_Db_Select) {
             $bind = $sql->getBind();
@@ -360,7 +360,6 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
                  */
                 #require_once 'Zend/Db/Adapter/Exception.php';
                 throw new Zend_Db_Adapter_Exception("Invalid fetch mode '$mode' specified");
-                break;
         }
     }
 
@@ -397,8 +396,7 @@ abstract class Zend_Db_Adapter_Pdo_Abstract extends Zend_Db_Adapter_Abstract
         $matches = null;
         if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $version, $matches)) {
             return $matches[1];
-        } else {
-            return null;
         }
+        return null;
     }
 }
