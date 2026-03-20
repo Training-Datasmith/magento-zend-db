@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,12 +21,10 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /**
  * Zend_Db_Exception
  */
 #require_once 'Zend/Db/Exception.php';
-
 /**
  * @category   Zend
  * @package    Zend_Db
@@ -36,23 +34,19 @@ declare(strict_types=1);
  */
 class Zend_Db_Adapter_Exception extends Zend_Db_Exception
 {
-    protected $_chainedException;
-
+    protected $_chained_exception;
     public function __construct($message = '', $code = 0, ?Exception $e = null)
     {
-        if ($e && (0 === $code)) {
-            $code = $e->getCode();
+        if ($e && 0 === $code) {
+            $code = $e->get_code();
         }
     }
-
-    public function hasChainedException()
+    public function has_chained_exception()
     {
-        return ($this->getPrevious() !== null);
+        return $this->get_previous() !== null;
     }
-
-    public function getChainedException()
+    public function get_chained_exception()
     {
-        return $this->getPrevious();
+        return $this->get_previous();
     }
-
 }

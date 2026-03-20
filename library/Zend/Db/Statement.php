@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,17 +21,14 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /**
  * @see Zend_Db
  */
 #require_once 'Zend/Db.php';
-
 /**
  * @see Zend_Db_Statement_Interface
  */
 #require_once 'Zend/Db/Statement/Interface.php';
-
 /**
  * Abstract class to emulate a PDOStatement for native database adapters.
  *
@@ -47,59 +44,50 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @var resource|object The driver level statement object/resource
      */
     protected $_stmt;
-
     /**
      * @var Zend_Db_Adapter_Abstract
      */
     protected $_adapter;
-
     /**
      * The current fetch mode.
      *
      * @var integer
      */
-    protected $_fetchMode = Zend_Db::FETCH_ASSOC;
-
+    protected $_fetch_mode = Zend_Db::FETCH_ASSOC;
     /**
      * Attributes.
      *
      * @var array
      */
     protected $_attribute = [];
-
     /**
      * Column result bindings.
      *
      * @var array
      */
-    protected $_bindColumn = [];
-
+    protected $_bind_column = [];
     /**
      * Query parameter bindings; covers bindParam() and bindValue().
      *
      * @var array
      */
-    protected $_bindParam = [];
-
+    protected $_bind_param = [];
     /**
      * SQL string split into an array at placeholders.
      *
      * @var array
      */
-    protected $_sqlSplit = [];
-
+    protected $_sql_split = [];
     /**
      * Parameter placeholders in the SQL string by position in the split array.
      *
      * @var array
      */
-    protected $_sqlParam = [];
-
+    protected $_sql_param = [];
     /**
      * @var Zend_Db_Profiler_Query
      */
-    protected $_queryId;
-
+    protected $_query_id;
     /**
      * Constructor for a statement.
      *
@@ -112,12 +100,10 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         if ($sql instanceof Zend_Db_Select) {
             $sql = $sql->assemble();
         }
-        $this->_parseParameters($sql);
+        $this->_parse_parameters($sql);
         $this->_prepare($sql);
-
-        $this->_queryId = $this->_adapter->getProfiler()->queryStart($sql);
+        $this->_query_id = $this->_adapter->get_profiler()->query_start($sql);
     }
-
     /**
      * Internal method called by abstract statment constructor to setup
      * the driver level statement
@@ -127,51 +113,42 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
     protected function _prepare($sql)
     {
     }
-
     /**
      * @param string $sql
      * @return void
      */
-    protected function _parseParameters($sql)
+    protected function _parse_parameters($sql)
     {
-        $this->_sqlSplit = [];
+        $this->_sql_split = [];
         if ($sql !== null) {
-            $sql = $this->_stripQuoted($sql);
-            $this->_sqlSplit = preg_split(
-                '/(\?|\:[a-zA-Z0-9_]+)/',
-                $sql,
-                -1,
-                PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
-            );
+            $sql = $this->_strip_quoted($sql);
+            $this->_sql_split = preg_split('/(\?|\:[a-zA-Z0-9_]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         }
-
         // map params
-        $this->_sqlParam = [];
-        foreach ($this->_sqlSplit as $val) {
+        $this->_sql_param = [];
+        foreach ($this->_sql_split as $val) {
             if ($val == '?') {
-                if ($this->_adapter->supportsParameters('positional') === false) {
+                if ($this->_adapter->supports_parameters('positional') === false) {
                     /**
                      * @see Zend_Db_Statement_Exception
                      */
                     #require_once 'Zend/Db/Statement/Exception.php';
-                    throw new Zend_Db_Statement_Exception("Invalid bind-variable position '$val'");
+                    throw new Zend_Db_Statement_Exception("Invalid bind-variable position '{$val}'");
                 }
             } elseif ($val[0] == ':') {
-                if ($this->_adapter->supportsParameters('named') === false) {
+                if ($this->_adapter->supports_parameters('named') === false) {
                     /**
                      * @see Zend_Db_Statement_Exception
                      */
                     #require_once 'Zend/Db/Statement/Exception.php';
-                    throw new Zend_Db_Statement_Exception("Invalid bind-variable name '$val'");
+                    throw new Zend_Db_Statement_Exception("Invalid bind-variable name '{$val}'");
                 }
             }
-            $this->_sqlParam[] = $val;
+            $this->_sql_param[] = $val;
         }
-
         // set up for binding
-        $this->_bindParam = [];
+        $this->_bind_param = [];
     }
-
     /**
      * Remove parts of a SQL string that contain quoted strings
      * of values or identifiers.
@@ -179,7 +156,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param string $sql
      * @return string
      */
-    protected function _stripQuoted($sql)
+    protected function _strip_quoted($sql)
     {
         // get the character for value quoting
         // this should be '
@@ -190,39 +167,35 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         $qe = $this->_adapter->quote($q);
         $qe = substr($qe, 1, 2);
         $qe = preg_quote($qe);
-        $escapeChar = substr($qe, 0, 1);
+        $escape_char = substr($qe, 0, 1);
         // remove 'foo\'bar'
         if (!empty($q)) {
-            $escapeChar = preg_quote($escapeChar);
+            $escape_char = preg_quote($escape_char);
             // this segfaults only after 65,000 characters instead of 9,000
-            $sql = preg_replace("/$q([^$q{$escapeChar}]*|($qe)*)*$q/s", '', $sql);
+            $sql = preg_replace("/{$q}([^{$q}{$escape_char}]*|({$qe})*)*{$q}/s", '', $sql);
         }
-
         if ($sql === null) {
             // this preg_replace call can return NULL in case of error (PREG_BACKTRACK_LIMIT_ERROR).
             // In this case the result of this method will be an empty string.
             return '';
         }
-
         // get a version of the SQL statement with all quoted
         // values and delimited identifiers stripped out
         // remove "foo\"bar"
         $sql = preg_replace('/"(\\\\"|[^"])*"/Us', '', $sql);
-
         // get the character for delimited id quotes,
         // this is usually " but in MySQL is `
-        $d = $this->_adapter->quoteIdentifier('a');
+        $d = $this->_adapter->quote_identifier('a');
         $d = $d[0];
         // get the value used as an escaped delimited id quote,
         // e.g. \" or "" or \`
-        $de = $this->_adapter->quoteIdentifier($d);
+        $de = $this->_adapter->quote_identifier($d);
         $de = substr($de, 1, 2);
         $de = preg_quote($de);
         // Note: $de and $d where never used..., now they are:
-        $sql = preg_replace("/$d($de|\\\\{2}|[^$d])*$d/Us", '', $sql);
+        $sql = preg_replace("/{$d}({$de}|\\\\{2}|[^{$d}])*{$d}/Us", '', $sql);
         return $sql;
     }
-
     /**
      * Bind a column of the statement result set to a PHP variable.
      *
@@ -232,12 +205,11 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param mixed  $type   OPTIONAL
      * @return bool
      */
-    public function bindColumn($column, &$param, $type = null)
+    public function bind_column($column, &$param, $type = null)
     {
-        $this->_bindColumn[$column] = & $param;
+        $this->_bind_column[$column] =& $param;
         return true;
     }
-
     /**
      * Binds a parameter to the specified variable name.
      *
@@ -248,7 +220,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param mixed $options   OPTIONAL Other options.
      * @return bool
      */
-    public function bindParam($parameter, &$variable, $type = null, $length = null, $options = null)
+    public function bind_param($parameter, &$variable, $type = null, $length = null, $options = null)
     {
         if (!is_int($parameter) && !is_string($parameter)) {
             /**
@@ -257,34 +229,30 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
             #require_once 'Zend/Db/Statement/Exception.php';
             throw new Zend_Db_Statement_Exception('Invalid bind-variable position');
         }
-
         $position = null;
-        if (($intval = (int) $parameter) > 0 && $this->_adapter->supportsParameters('positional')) {
-            if ($intval >= 1 || $intval <= count($this->_sqlParam)) {
+        if (($intval = (int) $parameter) > 0 && $this->_adapter->supports_parameters('positional')) {
+            if ($intval >= 1 || $intval <= count($this->_sql_param)) {
                 $position = $intval;
             }
-        } elseif ($this->_adapter->supportsParameters('named')) {
+        } elseif ($this->_adapter->supports_parameters('named')) {
             if ($parameter[0] != ':') {
                 $parameter = ':' . $parameter;
             }
-            if (in_array($parameter, $this->_sqlParam) !== false) {
+            if (in_array($parameter, $this->_sql_param) !== false) {
                 $position = $parameter;
             }
         }
-
         if ($position === null) {
             /**
              * @see Zend_Db_Statement_Exception
              */
             #require_once 'Zend/Db/Statement/Exception.php';
-            throw new Zend_Db_Statement_Exception("Invalid bind-variable position '$parameter'");
+            throw new Zend_Db_Statement_Exception("Invalid bind-variable position '{$parameter}'");
         }
-
         // Finally we are assured that $position is valid
-        $this->_bindParam[$position] = & $variable;
-        return $this->_bindParam($position, $variable, $type, $length, $options);
+        $this->_bind_param[$position] =& $variable;
+        return $this->_bind_param($position, $variable, $type, $length, $options);
     }
-
     /**
      * Binds a value to a parameter.
      *
@@ -293,11 +261,10 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param mixed $type      OPTIONAL Datatype of the parameter.
      * @return bool
      */
-    public function bindValue($parameter, $value, $type = null)
+    public function bind_value($parameter, $value, $type = null)
     {
-        return $this->bindParam($parameter, $value, $type);
+        return $this->bind_param($parameter, $value, $type);
     }
-
     /**
      * Executes a prepared statement.
      *
@@ -309,34 +276,29 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         /*
          * Simple case - no query profiler to manage.
          */
-        if ($this->_queryId === null) {
+        if ($this->_query_id === null) {
             return $this->_execute($params);
         }
-
         /*
          * Do the same thing, but with query profiler
          * management before and after the execute.
          */
-        $prof = $this->_adapter->getProfiler();
-        $qp = $prof->getQueryProfile($this->_queryId);
-        if ($qp->hasEnded()) {
-            $this->_queryId = $prof->queryClone($qp);
-            $qp = $prof->getQueryProfile($this->_queryId);
+        $prof = $this->_adapter->get_profiler();
+        $qp = $prof->get_query_profile($this->_query_id);
+        if ($qp->has_ended()) {
+            $this->_query_id = $prof->query_clone($qp);
+            $qp = $prof->get_query_profile($this->_query_id);
         }
         if ($params !== null) {
-            $qp->bindParams($params);
+            $qp->bind_params($params);
         } else {
-            $qp->bindParams($this->_bindParam);
+            $qp->bind_params($this->_bind_param);
         }
-        $qp->start($this->_queryId);
-
+        $qp->start($this->_query_id);
         $retval = $this->_execute($params);
-
-        $prof->queryEnd($this->_queryId);
-
+        $prof->query_end($this->_query_id);
         return $retval;
     }
-
     /**
      * Returns an array containing all of the result set rows.
      *
@@ -344,7 +306,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param int $col   OPTIONAL Column number, if fetch mode is by column.
      * @return array Collection of rows, each in a format by the fetch mode.
      */
-    public function fetchAll($style = null, $col = null)
+    public function fetch_all($style = null, $col = null)
     {
         $data = [];
         if ($style === Zend_Db::FETCH_COLUMN && $col === null) {
@@ -355,20 +317,19 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                 $data[] = $row;
             }
         } else {
-            while (false !== ($val = $this->fetchColumn($col))) {
+            while (false !== $val = $this->fetch_column($col)) {
                 $data[] = $val;
             }
         }
         return $data;
     }
-
     /**
      * Returns a single column from the next row of a result set.
      *
      * @param int $col OPTIONAL Position of the column to fetch.
      * @return string One value from the next row of result set, or false.
      */
-    public function fetchColumn($col = 0)
+    public function fetch_column($col = 0)
     {
         $col = (int) $col;
         $row = $this->fetch(Zend_Db::FETCH_NUM);
@@ -377,7 +338,6 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
         }
         return $row[$col];
     }
-
     /**
      * Fetches the next row and returns it as an object.
      *
@@ -385,7 +345,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param array  $config OPTIONAL Constructor arguments for the class.
      * @return mixed One object instance of the specified class, or false.
      */
-    public function fetchObject($class = 'stdClass', array $config = [])
+    public function fetch_object($class = 'stdClass', array $config = [])
     {
         $obj = new $class($config);
         $row = $this->fetch(Zend_Db::FETCH_ASSOC);
@@ -393,24 +353,22 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
             return false;
         }
         foreach ($row as $key => $val) {
-            $obj->$key = $val;
+            $obj->{$key} = $val;
         }
         return $obj;
     }
-
     /**
      * Retrieve a statement attribute.
      *
      * @param string $key Attribute name.
      * @return mixed      Attribute value.
      */
-    public function getAttribute($key)
+    public function get_attribute($key)
     {
         if (array_key_exists($key, $this->_attribute)) {
             return $this->_attribute[$key];
         }
     }
-
     /**
      * Set a statement attribute.
      *
@@ -418,11 +376,10 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param mixed  $val Attribute value.
      * @return bool
      */
-    public function setAttribute($key, $val)
+    public function set_attribute($key, $val)
     {
         $this->_attribute[$key] = $val;
     }
-
     /**
      * Set the default fetch mode for this statement.
      *
@@ -430,18 +387,18 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @return bool
      * @throws Zend_Db_Statement_Exception
      */
-    public function setFetchMode($mode)
+    public function set_fetch_mode($mode)
     {
         switch ($mode) {
             case Zend_Db::FETCH_NUM:
             case Zend_Db::FETCH_ASSOC:
             case Zend_Db::FETCH_BOTH:
             case Zend_Db::FETCH_OBJ:
-                $this->_fetchMode = $mode;
+                $this->_fetch_mode = $mode;
                 break;
             case Zend_Db::FETCH_BOUND:
             default:
-                $this->closeCursor();
+                $this->close_cursor();
                 /**
                  * @see Zend_Db_Statement_Exception
                  */
@@ -449,7 +406,6 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                 throw new Zend_Db_Statement_Exception('invalid fetch mode');
         }
     }
-
     /**
      * Helper function to map retrieved row
      * to bound column variables
@@ -457,7 +413,7 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
      * @param array $row
      * @return bool True
      */
-    public function _fetchBound($row)
+    public function _fetch_bound($row)
     {
         foreach ($row as $key => $value) {
             // bindColumn() takes 1-based integer positions
@@ -466,30 +422,28 @@ abstract class Zend_Db_Statement implements Zend_Db_Statement_Interface
                 $key++;
             }
             // set results only to variables that were bound previously
-            if (isset($this->_bindColumn[$key])) {
-                $this->_bindColumn[$key] = $value;
+            if (isset($this->_bind_column[$key])) {
+                $this->_bind_column[$key] = $value;
             }
         }
         return true;
     }
-
     /**
      * Gets the Zend_Db_Adapter_Abstract for this
      * particular Zend_Db_Statement object.
      *
      * @return Zend_Db_Adapter_Abstract
      */
-    public function getAdapter()
+    public function get_adapter()
     {
         return $this->_adapter;
     }
-
     /**
      * Gets the resource or object setup by the
      * _parse
      * @return unknown_type
      */
-    public function getDriverStatement()
+    public function get_driver_statement()
     {
         return $this->_stmt;
     }

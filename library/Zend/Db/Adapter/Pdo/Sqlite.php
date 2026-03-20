@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,12 +21,10 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 /**
  * Class for connecting to SQLite2 and SQLite3 databases and performing common operations.
  *
@@ -43,8 +41,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var string
      */
-    protected $_pdoType = 'sqlite';
-
+    protected $_pdo_type = 'sqlite';
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
      * Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE, or Zend_Db::FLOAT_TYPE.
@@ -56,14 +53,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = [
-        Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
-        Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
-        Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
-        'INTEGER'            => Zend_Db::BIGINT_TYPE,
-        'REAL'               => Zend_Db::FLOAT_TYPE,
-    ];
-
+    protected $_numeric_data_types = [Zend_Db::INT_TYPE => Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE, Zend_Db::FLOAT_TYPE => Zend_Db::FLOAT_TYPE, 'INTEGER' => Zend_Db::BIGINT_TYPE, 'REAL' => Zend_Db::FLOAT_TYPE];
     /**
      * Constructor.
      *
@@ -83,40 +73,35 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
     public function __construct(array $config = [])
     {
         if (isset($config['sqlite2']) && $config['sqlite2']) {
-            $this->_pdoType = 'sqlite2';
+            $this->_pdo_type = 'sqlite2';
         }
-
         // SQLite uses no username/password.  Stub to satisfy parent::_connect()
         $this->_config['username'] = null;
         $this->_config['password'] = null;
-
         return parent::__construct($config);
     }
-
     /**
      * Check for config options that are mandatory.
      * Throw exceptions if any are missing.
      *
      * @throws Zend_Db_Adapter_Exception
      */
-    protected function _checkRequiredOptions(array $config)
+    protected function _check_required_options(array $config)
     {
         // we need at least a dbname
-        if (! array_key_exists('dbname', $config)) {
+        if (!array_key_exists('dbname', $config)) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("Configuration array must have a key for 'dbname' that names the database instance");
         }
     }
-
     /**
      * DSN builder
      */
     protected function _dsn(): string
     {
-        return $this->_pdoType .':'. $this->_config['dbname'];
+        return $this->_pdo_type . ':' . $this->_config['dbname'];
     }
-
     /**
      * Special configuration for SQLite behavior: make sure that result sets
      * contain keys like 'column' instead of 'table.column'.
@@ -131,40 +116,32 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
         if ($this->_connection) {
             return;
         }
-
         parent::_connect();
-
         $retval = $this->_connection->exec('PRAGMA full_column_names=0');
         if ($retval === false) {
-            $error = $this->_connection->errorInfo();
+            $error = $this->_connection->error_info();
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception($error[2]);
         }
-
         $retval = $this->_connection->exec('PRAGMA short_column_names=1');
         if ($retval === false) {
-            $error = $this->_connection->errorInfo();
+            $error = $this->_connection->error_info();
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception($error[2]);
         }
     }
-
     /**
      * Returns a list of the tables in the database.
      *
      * @return array
      */
-    public function listTables()
+    public function list_tables()
     {
-        $sql = "SELECT name FROM sqlite_master WHERE type='table' "
-             . 'UNION ALL SELECT name FROM sqlite_temp_master '
-             . "WHERE type='table' ORDER BY name";
-
-        return $this->fetchCol($sql);
+        $sql = "SELECT name FROM sqlite_master WHERE type='table' " . 'UNION ALL SELECT name FROM sqlite_temp_master ' . "WHERE type='table' ORDER BY name";
+        return $this->fetch_col($sql);
     }
-
     /**
      * Returns the column descriptions for a table.
      *
@@ -192,36 +169,28 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $tableName
      * @param string $schemaName OPTIONAL
      */
-    public function describeTable($tableName, $schemaName = null): array
+    public function describe_table($table_name, $schema_name = null): array
     {
         $sql = 'PRAGMA ';
-
-        if ($schemaName) {
-            $sql .= $this->quoteIdentifier($schemaName) . '.';
+        if ($schema_name) {
+            $sql .= $this->quote_identifier($schema_name) . '.';
         }
-
-        $sql .= 'table_info('.$this->quoteIdentifier($tableName).')';
-
+        $sql .= 'table_info(' . $this->quote_identifier($table_name) . ')';
         $stmt = $this->query($sql);
-
         /**
          * Use FETCH_NUM so we are not dependent on the CASE attribute of the PDO connection
          */
-        $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-
-        $cid        = 0;
-        $name       = 1;
-        $type       = 2;
-        $notnull    = 3;
+        $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
+        $cid = 0;
+        $name = 1;
+        $type = 2;
+        $notnull = 3;
         $dflt_value = 4;
-        $pk         = 5;
-
+        $pk = 5;
         $desc = [];
-
         $p = 1;
         foreach ($result as $row) {
-            list($length, $scale, $precision, $primary, $primaryPosition, $identity) =
-                [null, null, null, false, null, false];
+            list($length, $scale, $precision, $primary, $primary_position, $identity) = [null, null, null, false, null, false];
             if (preg_match('/^((?:var)?char)\((\d+)\)/i', $row[$type], $matches)) {
                 $row[$type] = $matches[1];
                 $length = $matches[2];
@@ -232,33 +201,33 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
             }
             if ((bool) $row[$pk]) {
                 $primary = true;
-                $primaryPosition = $p;
+                $primary_position = $p;
                 /**
                  * SQLite INTEGER primary key is always auto-increment.
                  */
                 $identity = $row[$type] == 'INTEGER';
                 ++$p;
             }
-            $desc[$this->foldCase($row[$name])] = [
-                'SCHEMA_NAME'      => $this->foldCase($schemaName),
-                'TABLE_NAME'       => $this->foldCase($tableName),
-                'COLUMN_NAME'      => $this->foldCase($row[$name]),
-                'COLUMN_POSITION'  => $row[$cid] + 1,
-                'DATA_TYPE'        => $row[$type],
-                'DEFAULT'          => $row[$dflt_value],
-                'NULLABLE'         => ! (bool) $row[$notnull],
-                'LENGTH'           => $length,
-                'SCALE'            => $scale,
-                'PRECISION'        => $precision,
-                'UNSIGNED'         => null, // Sqlite3 does not support unsigned data
-                'PRIMARY'          => $primary,
-                'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity,
+            $desc[$this->fold_case($row[$name])] = [
+                'SCHEMA_NAME' => $this->fold_case($schema_name),
+                'TABLE_NAME' => $this->fold_case($table_name),
+                'COLUMN_NAME' => $this->fold_case($row[$name]),
+                'COLUMN_POSITION' => $row[$cid] + 1,
+                'DATA_TYPE' => $row[$type],
+                'DEFAULT' => $row[$dflt_value],
+                'NULLABLE' => !(bool) $row[$notnull],
+                'LENGTH' => $length,
+                'SCALE' => $scale,
+                'PRECISION' => $precision,
+                'UNSIGNED' => null,
+                // Sqlite3 does not support unsigned data
+                'PRIMARY' => $primary,
+                'PRIMARY_POSITION' => $primary_position,
+                'IDENTITY' => $identity,
             ];
         }
         return $desc;
     }
-
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
      *
@@ -272,24 +241,20 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
         if ($count <= 0) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument count={$count} is not valid");
         }
-
         $offset = intval($offset);
         if ($offset < 0) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument offset=$offset is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument offset={$offset} is not valid");
         }
-
-        $sql .= " LIMIT $count";
+        $sql .= " LIMIT {$count}";
         if ($offset > 0) {
-            $sql .= " OFFSET $offset";
+            $sql .= " OFFSET {$offset}";
         }
-
         return $sql;
     }
-
     /**
      * Quote a raw string.
      *
@@ -300,7 +265,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
     {
         if (!is_int($value) && !is_float($value)) {
             // Fix for null-byte injection
-            $value = addcslashes($value, "\000\032");
+            $value = addcslashes($value, "\x00\x1a");
         }
         return parent::_quote($value);
     }

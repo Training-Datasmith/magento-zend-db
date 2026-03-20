@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,19 +21,14 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /** @see Zend_Db_Adapter_Pdo_Abstract */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 /** @see Zend_Db_Abstract_Pdo_Ibm_Db2 */
 #require_once 'Zend/Db/Adapter/Pdo/Ibm/Db2.php';
-
 /** @see Zend_Db_Abstract_Pdo_Ibm_Ids */
 #require_once 'Zend/Db/Adapter/Pdo/Ibm/Ids.php';
-
 /** @see Zend_Db_Statement_Pdo_Ibm */
 #require_once 'Zend/Db/Statement/Pdo/Ibm.php';
-
 /**
  * @category   Zend
  * @package    Zend_Db
@@ -48,15 +43,13 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var string
      */
-    protected $_pdoType = 'ibm';
-
+    protected $_pdo_type = 'ibm';
     /**
      * The IBM data server connected to
      *
      * @var string
      */
-    protected $_serverType;
-
+    protected $_server_type;
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
      * Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE, or Zend_Db::FLOAT_TYPE.
@@ -68,21 +61,7 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = [
-                        Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
-                        Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
-                        Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
-                        'INTEGER'            => Zend_Db::INT_TYPE,
-                        'SMALLINT'           => Zend_Db::INT_TYPE,
-                        'BIGINT'             => Zend_Db::BIGINT_TYPE,
-                        'DECIMAL'            => Zend_Db::FLOAT_TYPE,
-                        'DEC'                => Zend_Db::FLOAT_TYPE,
-                        'REAL'               => Zend_Db::FLOAT_TYPE,
-                        'NUMERIC'            => Zend_Db::FLOAT_TYPE,
-                        'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
-                        'FLOAT'              => Zend_Db::FLOAT_TYPE,
-                        ];
-
+    protected $_numeric_data_types = [Zend_Db::INT_TYPE => Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE, Zend_Db::FLOAT_TYPE => Zend_Db::FLOAT_TYPE, 'INTEGER' => Zend_Db::INT_TYPE, 'SMALLINT' => Zend_Db::INT_TYPE, 'BIGINT' => Zend_Db::BIGINT_TYPE, 'DECIMAL' => Zend_Db::FLOAT_TYPE, 'DEC' => Zend_Db::FLOAT_TYPE, 'REAL' => Zend_Db::FLOAT_TYPE, 'NUMERIC' => Zend_Db::FLOAT_TYPE, 'DOUBLE PRECISION' => Zend_Db::FLOAT_TYPE, 'FLOAT' => Zend_Db::FLOAT_TYPE];
     /**
      * Creates a PDO object and connects to the database.
      *
@@ -99,86 +78,69 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
             return;
         }
         parent::_connect();
-
-        $this->getConnection()->setAttribute(Zend_Db::ATTR_STRINGIFY_FETCHES, true);
-
+        $this->get_connection()->set_attribute(Zend_Db::ATTR_STRINGIFY_FETCHES, true);
         try {
-            if ($this->_serverType === null) {
-                $server = substr($this->getConnection()->getAttribute(PDO::ATTR_SERVER_INFO), 0, 3);
-
+            if ($this->_server_type === null) {
+                $server = substr($this->get_connection()->get_attribute(PDO::ATTR_SERVER_INFO), 0, 3);
                 switch ($server) {
                     case 'DB2':
-                        $this->_serverType = new Zend_Db_Adapter_Pdo_Ibm_Db2($this);
-
+                        $this->_server_type = new Zend_Db_Adapter_Pdo_Ibm_Db2($this);
                         // Add DB2-specific numeric types
-                        $this->_numericDataTypes['DECFLOAT'] = Zend_Db::FLOAT_TYPE;
-                        $this->_numericDataTypes['DOUBLE']   = Zend_Db::FLOAT_TYPE;
-                        $this->_numericDataTypes['NUM']      = Zend_Db::FLOAT_TYPE;
-
+                        $this->_numeric_data_types['DECFLOAT'] = Zend_Db::FLOAT_TYPE;
+                        $this->_numeric_data_types['DOUBLE'] = Zend_Db::FLOAT_TYPE;
+                        $this->_numeric_data_types['NUM'] = Zend_Db::FLOAT_TYPE;
                         break;
                     case 'IDS':
-                        $this->_serverType = new Zend_Db_Adapter_Pdo_Ibm_Ids($this);
-
+                        $this->_server_type = new Zend_Db_Adapter_Pdo_Ibm_Ids($this);
                         // Add IDS-specific numeric types
-                        $this->_numericDataTypes['SERIAL']       = Zend_Db::INT_TYPE;
-                        $this->_numericDataTypes['SERIAL8']      = Zend_Db::BIGINT_TYPE;
-                        $this->_numericDataTypes['INT8']         = Zend_Db::BIGINT_TYPE;
-                        $this->_numericDataTypes['SMALLFLOAT']   = Zend_Db::FLOAT_TYPE;
-                        $this->_numericDataTypes['MONEY']        = Zend_Db::FLOAT_TYPE;
-
+                        $this->_numeric_data_types['SERIAL'] = Zend_Db::INT_TYPE;
+                        $this->_numeric_data_types['SERIAL8'] = Zend_Db::BIGINT_TYPE;
+                        $this->_numeric_data_types['INT8'] = Zend_Db::BIGINT_TYPE;
+                        $this->_numeric_data_types['SMALLFLOAT'] = Zend_Db::FLOAT_TYPE;
+                        $this->_numeric_data_types['MONEY'] = Zend_Db::FLOAT_TYPE;
                         break;
                 }
             }
         } catch (PDOException $e) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            $error = strpos($e->getMessage(), 'driver does not support that attribute');
+            $error = strpos($e->get_message(), 'driver does not support that attribute');
             if ($error) {
                 throw new Zend_Db_Adapter_Exception('PDO_IBM driver extension is downlevel.  Please use driver release version 1.2.1 or later', 0, $e);
             }
-            throw new Zend_Db_Adapter_Exception($e->getMessage(), $e->getCode(), $e);
+            throw new Zend_Db_Adapter_Exception($e->get_message(), $e->get_code(), $e);
         }
     }
-
     /**
      * Creates a PDO DSN for the adapter from $this->_config settings.
      */
     protected function _dsn(): string
     {
-        $this->_checkRequiredOptions($this->_config);
-
+        $this->_check_required_options($this->_config);
         // check if using full connection string
         if (array_key_exists('host', $this->_config)) {
-            $dsn = ';DATABASE=' . $this->_config['dbname']
-            . ';HOSTNAME=' . $this->_config['host']
-            . ';PORT='     . $this->_config['port']
-            // PDO_IBM supports only DB2 TCPIP protocol
-            . ';PROTOCOL=' . 'TCPIP;';
+            $dsn = ';DATABASE=' . $this->_config['dbname'] . ';HOSTNAME=' . $this->_config['host'] . ';PORT=' . $this->_config['port'] . ';PROTOCOL=' . 'TCPIP;';
         } else {
             // catalogued connection
             $dsn = $this->_config['dbname'];
         }
-        return $this->_pdoType . ': ' . $dsn;
+        return $this->_pdo_type . ': ' . $dsn;
     }
-
     /**
      * Checks required options
      *
      * @throws Zend_Db_Adapter_Exception
      * @return void
      */
-    protected function _checkRequiredOptions(array $config)
+    protected function _check_required_options(array $config)
     {
-        parent::_checkRequiredOptions($config);
-
-        if (array_key_exists('host', $this->_config) &&
-        !array_key_exists('port', $config)) {
+        parent::_check_required_options($config);
+        if (array_key_exists('host', $this->_config) && !array_key_exists('port', $config)) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
             throw new Zend_Db_Adapter_Exception("Configuration must have a key for 'port' when 'host' is specified");
         }
     }
-
     /**
      * Prepares an SQL statement.
      *
@@ -189,23 +151,21 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     public function prepare($sql): object
     {
         $this->_connect();
-        $stmtClass = $this->_defaultStmtClass;
-        $stmt = new $stmtClass($this, $sql);
-        $stmt->setFetchMode($this->_fetchMode);
+        $stmt_class = $this->_default_stmt_class;
+        $stmt = new $stmt_class($this, $sql);
+        $stmt->set_fetch_mode($this->_fetch_mode);
         return $stmt;
     }
-
     /**
      * Returns a list of the tables in the database.
      *
      * @return array
      */
-    public function listTables()
+    public function list_tables()
     {
         $this->_connect();
-        return $this->_serverType->listTables();
+        return $this->_server_type->list_tables();
     }
-
     /**
      * Returns the column descriptions for a table.
      *
@@ -235,12 +195,11 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $schemaName OPTIONAL
      * @return array
      */
-    public function describeTable($tableName, $schemaName = null)
+    public function describe_table($table_name, $schema_name = null)
     {
         $this->_connect();
-        return $this->_serverType->describeTable($tableName, $schemaName);
+        return $this->_server_type->describe_table($table_name, $schema_name);
     }
-
     /**
      * Inserts a table row with specified data.
      * Special handling for PDO_IBM
@@ -261,10 +220,8 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
                 }
             }
         }
-
         return parent::insert($table, $newbind);
     }
-
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
      *
@@ -276,9 +233,8 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
     public function limit($sql, $count, $offset = 0)
     {
         $this->_connect();
-        return $this->_serverType->limit($sql, $count, $offset);
+        return $this->_server_type->limit($sql, $count, $offset);
     }
-
     /**
      * Gets the last ID generated automatically by an IDENTITY/AUTOINCREMENT
      * column.
@@ -287,34 +243,30 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $primaryKey OPTIONAL
      * @return integer
      */
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function last_insert_id($table_name = null, $primary_key = null)
     {
         $this->_connect();
-
-        if ($tableName !== null) {
-            $sequenceName = $tableName;
-            if ($primaryKey) {
-                $sequenceName .= "_$primaryKey";
+        if ($table_name !== null) {
+            $sequence_name = $table_name;
+            if ($primary_key) {
+                $sequence_name .= "_{$primary_key}";
             }
-            $sequenceName .= '_seq';
-            return $this->lastSequenceId($sequenceName);
+            $sequence_name .= '_seq';
+            return $this->last_sequence_id($sequence_name);
         }
-
-        return $this->getConnection()->lastInsertId();
+        return $this->get_connection()->last_insert_id();
     }
-
     /**
      * Return the most recent value from the specified sequence in the database.
      *
      * @param string $sequenceName
      * @return integer
      */
-    public function lastSequenceId($sequenceName)
+    public function last_sequence_id($sequence_name)
     {
         $this->_connect();
-        return $this->_serverType->lastSequenceId($sequenceName);
+        return $this->_server_type->last_sequence_id($sequence_name);
     }
-
     /**
      * Generate a new value from the specified sequence in the database,
      * and return it.
@@ -322,22 +274,21 @@ class Zend_Db_Adapter_Pdo_Ibm extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $sequenceName
      * @return integer
      */
-    public function nextSequenceId($sequenceName)
+    public function next_sequence_id($sequence_name)
     {
         $this->_connect();
-        return $this->_serverType->nextSequenceId($sequenceName);
+        return $this->_server_type->next_sequence_id($sequence_name);
     }
-
     /**
      * Retrieve server version in PHP style
      * Pdo_Idm doesn't support getAttribute(PDO::ATTR_SERVER_VERSION)
      * @return string
      */
-    public function getServerVersion()
+    public function get_server_version()
     {
         try {
             $stmt = $this->query('SELECT service_level, fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO');
-            $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
+            $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
             if (count($result)) {
                 $matches = null;
                 if (preg_match('/((?:[0-9]{1,2}\.){1,3}[0-9]{1,2})/', $result[0][0], $matches)) {

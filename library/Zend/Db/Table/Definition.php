@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,7 +21,6 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /**
  * Class for SQL table interface.
  *
@@ -36,8 +35,7 @@ class Zend_Db_Table_Definition
     /**
      * @var array
      */
-    protected $_tableConfigs = [];
-
+    protected $_table_configs = [];
     /**
      * __construct()
      *
@@ -46,78 +44,69 @@ class Zend_Db_Table_Definition
     public function __construct($options = null)
     {
         if ($options instanceof Zend_Config) {
-            $this->setConfig($options);
+            $this->set_config($options);
         } elseif (is_array($options)) {
-            $this->setOptions($options);
+            $this->set_options($options);
         }
     }
-
     /**
      * setConfig()
      */
-    public function setConfig(Zend_Config $config): self
+    public function set_config(Zend_Config $config): self
     {
-        $this->setOptions($config->toArray());
+        $this->set_options($config->to_array());
         return $this;
     }
-
     /**
      * setOptions()
      */
-    public function setOptions(array $options): self
+    public function set_options(array $options): self
     {
-        foreach ($options as $optionName => $optionValue) {
-            $this->setTableConfig($optionName, $optionValue);
+        foreach ($options as $option_name => $option_value) {
+            $this->set_table_config($option_name, $option_value);
         }
         return $this;
     }
-
     /**
      * @param string $tableName
      */
-    public function setTableConfig($tableName, array $tableConfig): self
+    public function set_table_config($table_name, array $table_config): self
     {
         // @todo logic here
-        $tableConfig[Zend_Db_Table::DEFINITION_CONFIG_NAME] = $tableName;
-        $tableConfig[Zend_Db_Table::DEFINITION] = $this;
-
-        if (!isset($tableConfig[Zend_Db_Table::NAME])) {
-            $tableConfig[Zend_Db_Table::NAME] = $tableName;
+        $table_config[Zend_Db_Table::DEFINITION_CONFIG_NAME] = $table_name;
+        $table_config[Zend_Db_Table::DEFINITION] = $this;
+        if (!isset($table_config[Zend_Db_Table::NAME])) {
+            $table_config[Zend_Db_Table::NAME] = $table_name;
         }
-
-        $this->_tableConfigs[$tableName] = $tableConfig;
+        $this->_table_configs[$table_name] = $table_config;
         return $this;
     }
-
     /**
      * getTableConfig()
      *
      * @param string $tableName
      * @return array
      */
-    public function getTableConfig($tableName)
+    public function get_table_config($table_name)
     {
-        return $this->_tableConfigs[$tableName];
+        return $this->_table_configs[$table_name];
     }
-
     /**
      * removeTableConfig()
      *
      * @param string $tableName
      */
-    public function removeTableConfig($tableName)
+    public function remove_table_config($table_name)
     {
-        unset($this->_tableConfigs[$tableName]);
+        unset($this->_table_configs[$table_name]);
     }
-
     /**
      * hasTableConfig()
      *
      * @param string $tableName
      */
-    public function hasTableConfig($tableName): bool
+    public function has_table_config($table_name): bool
     {
-        return (isset($this->_tableConfigs[$tableName]));
+        return isset($this->_table_configs[$table_name]);
     }
-
 }

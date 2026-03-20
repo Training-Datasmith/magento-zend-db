@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -22,28 +22,23 @@ declare(strict_types=1);
  * @version    $Id$
  *
  */
-
 /**
  * @see Zend_Db
  */
 #require_once 'Zend/Db.php';
-
 /**
  * @see Zend_Db_Adapter_Abstract
  */
 #require_once 'Zend/Db/Adapter/Abstract.php';
-
 /**
  * @see Zend_Db_Statement_Db2
  */
 #require_once 'Zend/Db/Statement/Db2.php';
-
 /**
  * @package    Zend_Db
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
 class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
 {
     /**
@@ -63,33 +58,20 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      *
      * @var array
      */
-    protected $_config = [
-        'dbname'       => null,
-        'username'     => null,
-        'password'     => null,
-        'host'         => 'localhost',
-        'port'         => '50000',
-        'protocol'     => 'TCPIP',
-        'persistent'   => false,
-        'os'           => null,
-        'schema'       => null,
-    ];
-
+    protected $_config = ['dbname' => null, 'username' => null, 'password' => null, 'host' => 'localhost', 'port' => '50000', 'protocol' => 'TCPIP', 'persistent' => false, 'os' => null, 'schema' => null];
     /**
      * Execution mode
      *
      * @var int execution flag (DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF)
      */
     protected $_execute_mode = DB2_AUTOCOMMIT_ON;
-
     /**
      * Default class name for a DB statement.
      *
      * @var string
      */
-    protected $_defaultStmtClass = 'Zend_Db_Statement_Db2';
-    protected $_isI5 = false;
-
+    protected $_default_stmt_class = 'Zend_Db_Statement_Db2';
+    protected $_is_i5 = false;
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
      * Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE, or Zend_Db::FLOAT_TYPE.
@@ -101,17 +83,7 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = [
-        Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
-        Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
-        Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
-        'INTEGER'            => Zend_Db::INT_TYPE,
-        'SMALLINT'           => Zend_Db::INT_TYPE,
-        'BIGINT'             => Zend_Db::BIGINT_TYPE,
-        'DECIMAL'            => Zend_Db::FLOAT_TYPE,
-        'NUMERIC'            => Zend_Db::FLOAT_TYPE,
-    ];
-
+    protected $_numeric_data_types = [Zend_Db::INT_TYPE => Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE, Zend_Db::FLOAT_TYPE => Zend_Db::FLOAT_TYPE, 'INTEGER' => Zend_Db::INT_TYPE, 'SMALLINT' => Zend_Db::INT_TYPE, 'BIGINT' => Zend_Db::BIGINT_TYPE, 'DECIMAL' => Zend_Db::FLOAT_TYPE, 'NUMERIC' => Zend_Db::FLOAT_TYPE];
     /**
      * Creates a connection resource.
      *
@@ -123,7 +95,6 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
             // connection already exists
             return;
         }
-
         if (!extension_loaded('ibm_db2')) {
             /**
              * @see Zend_Db_Adapter_Db2_Exception
@@ -131,8 +102,7 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
             #require_once 'Zend/Db/Adapter/Db2/Exception.php';
             throw new Zend_Db_Adapter_Db2_Exception('The IBM DB2 extension is required for this adapter but the extension is not loaded');
         }
-
-        $this->_determineI5();
+        $this->_determine_i5();
         if ($this->_config['persistent']) {
             // use persistent connection
             $conn_func_name = 'db2_pconnect';
@@ -140,54 +110,29 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
             // use "normal" connection
             $conn_func_name = 'db2_connect';
         }
-
         if (!isset($this->_config['driver_options']['autocommit'])) {
             // set execution mode
-            $this->_config['driver_options']['autocommit'] = &$this->_execute_mode;
+            $this->_config['driver_options']['autocommit'] =& $this->_execute_mode;
         }
-
         if (isset($this->_config['options'][Zend_Db::CASE_FOLDING])) {
-            $caseAttrMap = [
-                Zend_Db::CASE_NATURAL => DB2_CASE_NATURAL,
-                Zend_Db::CASE_UPPER   => DB2_CASE_UPPER,
-                Zend_Db::CASE_LOWER   => DB2_CASE_LOWER,
-            ];
-            $this->_config['driver_options']['DB2_ATTR_CASE'] = $caseAttrMap[$this->_config['options'][Zend_Db::CASE_FOLDING]];
+            $case_attr_map = [Zend_Db::CASE_NATURAL => DB2_CASE_NATURAL, Zend_Db::CASE_UPPER => DB2_CASE_UPPER, Zend_Db::CASE_LOWER => DB2_CASE_LOWER];
+            $this->_config['driver_options']['DB2_ATTR_CASE'] = $case_attr_map[$this->_config['options'][Zend_Db::CASE_FOLDING]];
         }
-
-        if ($this->_isI5 && isset($this->_config['driver_options']['i5_naming'])) {
+        if ($this->_is_i5 && isset($this->_config['driver_options']['i5_naming'])) {
             if ($this->_config['driver_options']['i5_naming']) {
                 $this->_config['driver_options']['i5_naming'] = DB2_I5_NAMING_ON;
             } else {
                 $this->_config['driver_options']['i5_naming'] = DB2_I5_NAMING_OFF;
             }
         }
-
-        if ($this->_config['host'] !== 'localhost' && !$this->_isI5) {
+        if ($this->_config['host'] !== 'localhost' && !$this->_is_i5) {
             // if the host isn't localhost, use extended connection params
-            $dbname = 'DRIVER={IBM DB2 ODBC DRIVER}' .
-                     ';DATABASE=' . $this->_config['dbname'] .
-                     ';HOSTNAME=' . $this->_config['host'] .
-                     ';PORT='     . $this->_config['port'] .
-                     ';PROTOCOL=' . $this->_config['protocol'] .
-                     ';UID='      . $this->_config['username'] .
-                     ';PWD='      . $this->_config['password'] .';';
-            $this->_connection = $conn_func_name(
-                $dbname,
-                null,
-                null,
-                $this->_config['driver_options']
-            );
+            $dbname = 'DRIVER={IBM DB2 ODBC DRIVER}' . ';DATABASE=' . $this->_config['dbname'] . ';HOSTNAME=' . $this->_config['host'] . ';PORT=' . $this->_config['port'] . ';PROTOCOL=' . $this->_config['protocol'] . ';UID=' . $this->_config['username'] . ';PWD=' . $this->_config['password'] . ';';
+            $this->_connection = $conn_func_name($dbname, null, null, $this->_config['driver_options']);
         } else {
             // host is localhost, so use standard connection params
-            $this->_connection = $conn_func_name(
-                $this->_config['dbname'],
-                $this->_config['username'],
-                $this->_config['password'],
-                $this->_config['driver_options']
-            );
+            $this->_connection = $conn_func_name($this->_config['dbname'], $this->_config['username'], $this->_config['password'], $this->_config['driver_options']);
         }
-
         // check the connection
         if (!$this->_connection) {
             /**
@@ -197,29 +142,25 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
             throw new Zend_Db_Adapter_Db2_Exception(db2_conn_errormsg(), db2_conn_error());
         }
     }
-
     /**
      * Test if a connection is active
      */
-    public function isConnected(): bool
+    public function is_connected(): bool
     {
-        return (is_resource($this->_connection)
-                     && get_resource_type($this->_connection) == 'DB2 Connection');
+        return is_resource($this->_connection) && get_resource_type($this->_connection) == 'DB2 Connection';
     }
-
     /**
      * Force the connection to close.
      *
      * @return void
      */
-    public function closeConnection()
+    public function close_connection()
     {
-        if ($this->isConnected()) {
+        if ($this->is_connected()) {
             db2_close($this->_connection);
         }
         $this->_connection = null;
     }
-
     /**
      * Returns an SQL statement for preparation.
      *
@@ -229,31 +170,29 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
     public function prepare($sql): object
     {
         $this->_connect();
-        $stmtClass = $this->_defaultStmtClass;
-        if (!class_exists($stmtClass)) {
+        $stmt_class = $this->_default_stmt_class;
+        if (!class_exists($stmt_class)) {
             #require_once 'Zend/Loader.php';
-            Zend_Loader::loadClass($stmtClass);
+            Zend_Loader::load_class($stmt_class);
         }
-        $stmt = new $stmtClass($this, $sql);
-        $stmt->setFetchMode($this->_fetchMode);
+        $stmt = new $stmt_class($this, $sql);
+        $stmt->set_fetch_mode($this->_fetch_mode);
         return $stmt;
     }
-
     /**
      * Gets the execution mode
      *
      * @return int the execution mode (DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF)
      */
-    public function _getExecuteMode()
+    public function _get_execute_mode()
     {
         return $this->_execute_mode;
     }
-
     /**
      * @param integer $mode
      * @return void
      */
-    public function _setExecuteMode($mode)
+    public function _set_execute_mode($mode)
     {
         switch ($mode) {
             case DB2_AUTOCOMMIT_OFF:
@@ -269,7 +208,6 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
                 throw new Zend_Db_Adapter_Db2_Exception('execution mode not supported');
         }
     }
-
     /**
      * Quote a raw string.
      *
@@ -291,41 +229,33 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
         }
         return parent::_quote($value);
     }
-
     /**
      * @return string
      */
-    public function getQuoteIdentifierSymbol()
+    public function get_quote_identifier_symbol()
     {
         $this->_connect();
         $info = db2_server_info($this->_connection);
         if ($info) {
-            $identQuote = $info->IDENTIFIER_QUOTE_CHAR;
-        } else {
-            // db2_server_info() does not return result on some i5 OS version
-            if ($this->_isI5) {
-                $identQuote = "'";
-            }
+            $ident_quote = $info->IDENTIFIER_QUOTE_CHAR;
+        } else if ($this->_is_i5) {
+            $ident_quote = "'";
         }
-        return $identQuote;
+        return $ident_quote;
     }
-
     /**
      * Returns a list of the tables in the database.
      * @param string $schema OPTIONAL
      * @return array
      */
-    public function listTables($schema = null)
+    public function list_tables($schema = null)
     {
         $this->_connect();
-
         if ($schema === null && $this->_config['schema'] != null) {
             $schema = $this->_config['schema'];
         }
-
         $tables = [];
-
-        if (!$this->_isI5) {
+        if (!$this->_is_i5) {
             if ($schema) {
                 $stmt = db2_tables($this->_connection, null, $schema);
             } else {
@@ -335,12 +265,10 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
                 $tables[] = $row['TABLE_NAME'];
             }
         } else {
-            $tables = $this->_i5listTables($schema);
+            $tables = $this->_i5list_tables($schema);
         }
-
         return $tables;
     }
-
     /**
      * Returns the column descriptions for a table.
      *
@@ -369,122 +297,67 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      * @param string $tableName
      * @param string $schemaName OPTIONAL
      */
-    public function describeTable($tableName, $schemaName = null): array
+    public function describe_table($table_name, $schema_name = null): array
     {
         // Ensure the connection is made so that _isI5 is set
         $this->_connect();
-
-        if ($schemaName === null && $this->_config['schema'] != null) {
-            $schemaName = $this->_config['schema'];
+        if ($schema_name === null && $this->_config['schema'] != null) {
+            $schema_name = $this->_config['schema'];
         }
-
-        if (!$this->_isI5) {
-
-            $sql = "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,
-                c.typename, c.default, c.nulls, c.length, c.scale,
-                c.identity, tc.type AS tabconsttype, k.colseq
-                FROM syscat.columns c
-                LEFT JOIN (syscat.keycoluse k JOIN syscat.tabconst tc
-                ON (k.tabschema = tc.tabschema
-                    AND k.tabname = tc.tabname
-                    AND tc.type = 'P'))
-                ON (c.tabschema = k.tabschema
-                    AND c.tabname = k.tabname
-                    AND c.colname = k.colname)
-                WHERE "
-                . $this->quoteInto('UPPER(c.tabname) = UPPER(?)', $tableName);
-
-            if ($schemaName) {
-                $sql .= $this->quoteInto(' AND UPPER(c.tabschema) = UPPER(?)', $schemaName);
+        if (!$this->_is_i5) {
+            $sql = "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,\n                c.typename, c.default, c.nulls, c.length, c.scale,\n                c.identity, tc.type AS tabconsttype, k.colseq\n                FROM syscat.columns c\n                LEFT JOIN (syscat.keycoluse k JOIN syscat.tabconst tc\n                ON (k.tabschema = tc.tabschema\n                    AND k.tabname = tc.tabname\n                    AND tc.type = 'P'))\n                ON (c.tabschema = k.tabschema\n                    AND c.tabname = k.tabname\n                    AND c.colname = k.colname)\n                WHERE " . $this->quote_into('UPPER(c.tabname) = UPPER(?)', $table_name);
+            if ($schema_name) {
+                $sql .= $this->quote_into(' AND UPPER(c.tabschema) = UPPER(?)', $schema_name);
             }
-
             $sql .= ' ORDER BY c.colno';
-
         } else {
-
             // DB2 On I5 specific query
-            $sql = "SELECT DISTINCT C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION,
-                C.DATA_TYPE, C.COLUMN_DEFAULT, C.NULLS ,C.LENGTH, C.SCALE, LEFT(C.IDENTITY,1),
-                LEFT(tc.TYPE, 1) AS tabconsttype, k.COLSEQ
-                FROM QSYS2.SYSCOLUMNS C
-                LEFT JOIN (QSYS2.syskeycst k JOIN QSYS2.SYSCST tc
-                    ON (k.TABLE_SCHEMA = tc.TABLE_SCHEMA
-                      AND k.TABLE_NAME = tc.TABLE_NAME
-                      AND LEFT(tc.type,1) = 'P'))
-                    ON (C.TABLE_SCHEMA = k.TABLE_SCHEMA
-                       AND C.TABLE_NAME = k.TABLE_NAME
-                       AND C.COLUMN_NAME = k.COLUMN_NAME)
-                WHERE "
-                . $this->quoteInto('UPPER(C.TABLE_NAME) = UPPER(?)', $tableName);
-
-            if ($schemaName) {
-                $sql .= $this->quoteInto(' AND UPPER(C.TABLE_SCHEMA) = UPPER(?)', $schemaName);
+            $sql = "SELECT DISTINCT C.TABLE_SCHEMA, C.TABLE_NAME, C.COLUMN_NAME, C.ORDINAL_POSITION,\n                C.DATA_TYPE, C.COLUMN_DEFAULT, C.NULLS ,C.LENGTH, C.SCALE, LEFT(C.IDENTITY,1),\n                LEFT(tc.TYPE, 1) AS tabconsttype, k.COLSEQ\n                FROM QSYS2.SYSCOLUMNS C\n                LEFT JOIN (QSYS2.syskeycst k JOIN QSYS2.SYSCST tc\n                    ON (k.TABLE_SCHEMA = tc.TABLE_SCHEMA\n                      AND k.TABLE_NAME = tc.TABLE_NAME\n                      AND LEFT(tc.type,1) = 'P'))\n                    ON (C.TABLE_SCHEMA = k.TABLE_SCHEMA\n                       AND C.TABLE_NAME = k.TABLE_NAME\n                       AND C.COLUMN_NAME = k.COLUMN_NAME)\n                WHERE " . $this->quote_into('UPPER(C.TABLE_NAME) = UPPER(?)', $table_name);
+            if ($schema_name) {
+                $sql .= $this->quote_into(' AND UPPER(C.TABLE_SCHEMA) = UPPER(?)', $schema_name);
             }
-
             $sql .= ' ORDER BY C.ORDINAL_POSITION FOR FETCH ONLY';
         }
-
         $desc = [];
         $stmt = $this->query($sql);
-
         /**
          * To avoid case issues, fetch using FETCH_NUM
          */
-        $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-
+        $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
         /**
          * The ordering of columns is defined by the query so we can map
          * to variables to improve readability
          */
-        $tabschema      = 0;
-        $tabname        = 1;
-        $colname        = 2;
-        $colno          = 3;
-        $typename       = 4;
-        $default        = 5;
-        $nulls          = 6;
-        $length         = 7;
-        $scale          = 8;
-        $identityCol    = 9;
-        $tabconstType   = 10;
-        $colseq         = 11;
-
+        $tabschema = 0;
+        $tabname = 1;
+        $colname = 2;
+        $colno = 3;
+        $typename = 4;
+        $default = 5;
+        $nulls = 6;
+        $length = 7;
+        $scale = 8;
+        $identity_col = 9;
+        $tabconst_type = 10;
+        $colseq = 11;
         foreach ($result as $row) {
-            list($primary, $primaryPosition, $identity) = [false, null, false];
-            if ($row[$tabconstType] == 'P') {
+            list($primary, $primary_position, $identity) = [false, null, false];
+            if ($row[$tabconst_type] == 'P') {
                 $primary = true;
-                $primaryPosition = $row[$colseq];
+                $primary_position = $row[$colseq];
             }
             /**
              * In IBM DB2, an column can be IDENTITY
              * even if it is not part of the PRIMARY KEY.
              */
-            if ($row[$identityCol] == 'Y') {
+            if ($row[$identity_col] == 'Y') {
                 $identity = true;
             }
-
             // only colname needs to be case adjusted
-            $desc[$this->foldCase($row[$colname])] = [
-                'SCHEMA_NAME'      => $this->foldCase($row[$tabschema]),
-                'TABLE_NAME'       => $this->foldCase($row[$tabname]),
-                'COLUMN_NAME'      => $this->foldCase($row[$colname]),
-                'COLUMN_POSITION'  => (!$this->_isI5) ? $row[$colno] + 1 : $row[$colno],
-                'DATA_TYPE'        => $row[$typename],
-                'DEFAULT'          => $row[$default],
-                'NULLABLE'         => $row[$nulls] == 'Y',
-                'LENGTH'           => $row[$length],
-                'SCALE'            => $row[$scale],
-                'PRECISION'        => ($row[$typename] == 'DECIMAL' ? $row[$length] : 0),
-                'UNSIGNED'         => false,
-                'PRIMARY'          => $primary,
-                'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity,
-            ];
+            $desc[$this->fold_case($row[$colname])] = ['SCHEMA_NAME' => $this->fold_case($row[$tabschema]), 'TABLE_NAME' => $this->fold_case($row[$tabname]), 'COLUMN_NAME' => $this->fold_case($row[$colname]), 'COLUMN_POSITION' => !$this->_is_i5 ? $row[$colno] + 1 : $row[$colno], 'DATA_TYPE' => $row[$typename], 'DEFAULT' => $row[$default], 'NULLABLE' => $row[$nulls] == 'Y', 'LENGTH' => $row[$length], 'SCALE' => $row[$scale], 'PRECISION' => $row[$typename] == 'DECIMAL' ? $row[$length] : 0, 'UNSIGNED' => false, 'PRIMARY' => $primary, 'PRIMARY_POSITION' => $primary_position, 'IDENTITY' => $identity];
         }
-
         return $desc;
     }
-
     /**
      * Return the most recent value from the specified sequence in the database.
      * This is supported only on RDBMS brands that support sequences
@@ -492,22 +365,19 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      *
      * @param string $sequenceName
      */
-    public function lastSequenceId($sequenceName): string
+    public function last_sequence_id($sequence_name): string
     {
         $this->_connect();
-
-        if (!$this->_isI5) {
-            $quotedSequenceName = $this->quoteIdentifier($sequenceName, true);
-            $sql = 'SELECT PREVVAL FOR ' . $quotedSequenceName . ' AS VAL FROM SYSIBM.SYSDUMMY1';
+        if (!$this->_is_i5) {
+            $quoted_sequence_name = $this->quote_identifier($sequence_name, true);
+            $sql = 'SELECT PREVVAL FOR ' . $quoted_sequence_name . ' AS VAL FROM SYSIBM.SYSDUMMY1';
         } else {
-            $quotedSequenceName = $sequenceName;
-            $sql = 'SELECT PREVVAL FOR ' . $this->quoteIdentifier($sequenceName, true) . ' AS VAL FROM QSYS2.QSQPTABL';
+            $quoted_sequence_name = $sequence_name;
+            $sql = 'SELECT PREVVAL FOR ' . $this->quote_identifier($sequence_name, true) . ' AS VAL FROM QSYS2.QSQPTABL';
         }
-
-        $value = $this->fetchOne($sql);
+        $value = $this->fetch_one($sql);
         return (string) $value;
     }
-
     /**
      * Generate a new value from the specified sequence in the database, and return it.
      * This is supported only on RDBMS brands that support sequences
@@ -515,14 +385,13 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      *
      * @param string $sequenceName
      */
-    public function nextSequenceId($sequenceName): string
+    public function next_sequence_id($sequence_name): string
     {
         $this->_connect();
-        $sql = 'SELECT NEXTVAL FOR '.$this->quoteIdentifier($sequenceName, true).' AS VAL FROM SYSIBM.SYSDUMMY1';
-        $value = $this->fetchOne($sql);
+        $sql = 'SELECT NEXTVAL FOR ' . $this->quote_identifier($sequence_name, true) . ' AS VAL FROM SYSIBM.SYSDUMMY1';
+        $value = $this->fetch_one($sql);
         return (string) $value;
     }
-
     /**
      * Gets the last ID generated automatically by an IDENTITY/AUTOINCREMENT column.
      *
@@ -541,39 +410,33 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      * @param string $idType OPTIONAL used for i5 platform to define sequence/idenity unique value
      * @return string
      */
-
-    public function lastInsertId($tableName = null, $primaryKey = null, $idType = null)
+    public function last_insert_id($table_name = null, $primary_key = null, $id_type = null)
     {
         $this->_connect();
-
-        if ($this->_isI5) {
-            return (string) $this->_i5LastInsertId($tableName, $idType);
+        if ($this->_is_i5) {
+            return (string) $this->_i5last_insert_id($table_name, $id_type);
         }
-
-        if ($tableName !== null) {
-            $sequenceName = $tableName;
-            if ($primaryKey) {
-                $sequenceName .= "_$primaryKey";
+        if ($table_name !== null) {
+            $sequence_name = $table_name;
+            if ($primary_key) {
+                $sequence_name .= "_{$primary_key}";
             }
-            $sequenceName .= '_seq';
-            return $this->lastSequenceId($sequenceName);
+            $sequence_name .= '_seq';
+            return $this->last_sequence_id($sequence_name);
         }
-
         $sql = 'SELECT IDENTITY_VAL_LOCAL() AS VAL FROM SYSIBM.SYSDUMMY1';
-        $value = $this->fetchOne($sql);
+        $value = $this->fetch_one($sql);
         return (string) $value;
     }
-
     /**
      * Begin a transaction.
      *
      * @return void
      */
-    protected function _beginTransaction()
+    protected function _begin_transaction()
     {
-        $this->_setExecuteMode(DB2_AUTOCOMMIT_OFF);
+        $this->_set_execute_mode(DB2_AUTOCOMMIT_OFF);
     }
-
     /**
      * Commit a transaction.
      *
@@ -586,35 +449,26 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
              * @see Zend_Db_Adapter_Db2_Exception
              */
             #require_once 'Zend/Db/Adapter/Db2/Exception.php';
-            throw new Zend_Db_Adapter_Db2_Exception(
-                db2_conn_errormsg($this->_connection),
-                db2_conn_error($this->_connection)
-            );
+            throw new Zend_Db_Adapter_Db2_Exception(db2_conn_errormsg($this->_connection), db2_conn_error($this->_connection));
         }
-
-        $this->_setExecuteMode(DB2_AUTOCOMMIT_ON);
+        $this->_set_execute_mode(DB2_AUTOCOMMIT_ON);
     }
-
     /**
      * Rollback a transaction.
      *
      * @return void
      */
-    protected function _rollBack()
+    protected function _roll_back()
     {
         if (!db2_rollback($this->_connection)) {
             /**
              * @see Zend_Db_Adapter_Db2_Exception
              */
             #require_once 'Zend/Db/Adapter/Db2/Exception.php';
-            throw new Zend_Db_Adapter_Db2_Exception(
-                db2_conn_errormsg($this->_connection),
-                db2_conn_error($this->_connection)
-            );
+            throw new Zend_Db_Adapter_Db2_Exception(db2_conn_errormsg($this->_connection), db2_conn_error($this->_connection));
         }
-        $this->_setExecuteMode(DB2_AUTOCOMMIT_ON);
+        $this->_set_execute_mode(DB2_AUTOCOMMIT_ON);
     }
-
     /**
      * Set the fetch mode.
      *
@@ -622,16 +476,21 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      * @return void
      * @throws Zend_Db_Adapter_Db2_Exception
      */
-    public function setFetchMode($mode)
+    public function set_fetch_mode($mode)
     {
         switch ($mode) {
-            case Zend_Db::FETCH_NUM:   // seq array
-            case Zend_Db::FETCH_ASSOC: // assoc array
-            case Zend_Db::FETCH_BOTH:  // seq+assoc array
-            case Zend_Db::FETCH_OBJ:   // object
-                $this->_fetchMode = $mode;
+            case Zend_Db::FETCH_NUM:
+            // seq array
+            case Zend_Db::FETCH_ASSOC:
+            // assoc array
+            case Zend_Db::FETCH_BOTH:
+            // seq+assoc array
+            case Zend_Db::FETCH_OBJ:
+                // object
+                $this->_fetch_mode = $mode;
                 break;
-            case Zend_Db::FETCH_BOUND:   // bound to PHP variable
+            case Zend_Db::FETCH_BOUND:
+                // bound to PHP variable
                 /**
                  * @see Zend_Db_Adapter_Db2_Exception
                  */
@@ -642,10 +501,9 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
                  * @see Zend_Db_Adapter_Db2_Exception
                  */
                 #require_once 'Zend/Db/Adapter/Db2/Exception.php';
-                throw new Zend_Db_Adapter_Db2_Exception("Invalid fetch mode '$mode' specified");
+                throw new Zend_Db_Adapter_Db2_Exception("Invalid fetch mode '{$mode}' specified");
         }
     }
-
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
      *
@@ -661,22 +519,19 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
              * @see Zend_Db_Adapter_Db2_Exception
              */
             #require_once 'Zend/Db/Adapter/Db2/Exception.php';
-            throw new Zend_Db_Adapter_Db2_Exception("LIMIT argument count=$count is not valid");
+            throw new Zend_Db_Adapter_Db2_Exception("LIMIT argument count={$count} is not valid");
         }
-
         $offset = intval($offset);
         if ($offset < 0) {
             /**
              * @see Zend_Db_Adapter_Db2_Exception
              */
             #require_once 'Zend/Db/Adapter/Db2/Exception.php';
-            throw new Zend_Db_Adapter_Db2_Exception("LIMIT argument offset=$offset is not valid");
+            throw new Zend_Db_Adapter_Db2_Exception("LIMIT argument offset={$offset} is not valid");
         }
-
         if ($offset == 0) {
-            return $sql . " FETCH FIRST $count ROWS ONLY";
+            return $sql . " FETCH FIRST {$count} ROWS ONLY";
         }
-
         /**
          * DB2 does not implement the LIMIT clause as some RDBMS do.
          * We have to simulate it with subqueries and ROWNUM.
@@ -693,131 +548,116 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
             WHERE z2.zend_db_rownum BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $count);
         return $limit_sql;
     }
-
     /**
      * Check if the adapter supports real SQL parameters.
      *
      * @param string $type 'positional' or 'named'
      */
-    public function supportsParameters($type): bool
+    public function supports_parameters($type): bool
     {
         if ($type == 'positional') {
             return true;
         }
-
         // if its 'named' or anything else
         return false;
     }
-
     /**
      * Retrieve server version in PHP style
      *
      * @return string
      */
-    public function getServerVersion()
+    public function get_server_version()
     {
         $this->_connect();
         $server_info = db2_server_info($this->_connection);
         if ($server_info !== false) {
             $version = $server_info->DBMS_VER;
-            if ($this->_isI5) {
+            if ($this->_is_i5) {
                 return (int) substr($version, 0, 2) . '.' . (int) substr($version, 2, 2) . '.' . (int) substr($version, 4);
             }
             return $version;
         }
         return null;
     }
-
     /**
      * Return whether or not this is running on i5
      */
-    public function isI5(): bool
+    public function is_i5(): bool
     {
-        if ($this->_isI5 === null) {
-            $this->_determineI5();
+        if ($this->_is_i5 === null) {
+            $this->_determine_i5();
         }
-
-        return (bool) $this->_isI5;
+        return (bool) $this->_is_i5;
     }
-
     /**
      * Check the connection parameters according to verify
      * type of used OS
      *
      *  @return void
      */
-    protected function _determineI5()
+    protected function _determine_i5()
     {
         // first us the compiled flag.
-        $this->_isI5 = (php_uname('s') == 'OS400') ? true : false;
-
+        $this->_is_i5 = php_uname('s') == 'OS400' ? true : false;
         // if this is set, then us it
         if (isset($this->_config['os'])) {
             if (strtolower($this->_config['os']) === 'i5') {
-                $this->_isI5 = true;
+                $this->_is_i5 = true;
             } else {
                 // any other value passed in, its null
-                $this->_isI5 = false;
+                $this->_is_i5 = false;
             }
         }
-
     }
-
     /**
      * Db2 On I5 specific method
      *
      * Returns a list of the tables in the database .
      * Used only for DB2/400.
      */
-    protected function _i5listTables($schema = null): array
+    protected function _i5list_tables($schema = null): array
     {
         //list of i5 libraries.
         $tables = [];
         if ($schema) {
-            $tablesStatement = db2_tables($this->_connection, null, $schema);
-            while ($rowTables = db2_fetch_assoc($tablesStatement)) {
-                if ($rowTables['TABLE_NAME'] !== null) {
-                    $tables[] = $rowTables['TABLE_NAME'];
+            $tables_statement = db2_tables($this->_connection, null, $schema);
+            while ($row_tables = db2_fetch_assoc($tables_statement)) {
+                if ($row_tables['TABLE_NAME'] !== null) {
+                    $tables[] = $row_tables['TABLE_NAME'];
                 }
             }
         } else {
-            $schemaStatement = db2_tables($this->_connection);
-            while ($schema = db2_fetch_assoc($schemaStatement)) {
+            $schema_statement = db2_tables($this->_connection);
+            while ($schema = db2_fetch_assoc($schema_statement)) {
                 if ($schema['TABLE_SCHEM'] !== null) {
                     // list of the tables which belongs to the selected library
-                    $tablesStatement = db2_tables($this->_connection, null, $schema['TABLE_SCHEM']);
-                    if (is_resource($tablesStatement)) {
-                        while ($rowTables = db2_fetch_assoc($tablesStatement)) {
-                            if ($rowTables['TABLE_NAME'] !== null) {
-                                $tables[] = $rowTables['TABLE_NAME'];
+                    $tables_statement = db2_tables($this->_connection, null, $schema['TABLE_SCHEM']);
+                    if (is_resource($tables_statement)) {
+                        while ($row_tables = db2_fetch_assoc($tables_statement)) {
+                            if ($row_tables['TABLE_NAME'] !== null) {
+                                $tables[] = $row_tables['TABLE_NAME'];
                             }
                         }
                     }
                 }
             }
         }
-
         return $tables;
     }
-
-    protected function _i5LastInsertId($objectName = null, $idType = null)
+    protected function _i5last_insert_id($object_name = null, $id_type = null)
     {
-
-        if ($objectName === null) {
+        if ($object_name === null) {
             $sql = 'SELECT IDENTITY_VAL_LOCAL() AS VAL FROM QSYS2.QSQPTABL';
-            return $this->fetchOne($sql);
+            return $this->fetch_one($sql);
         }
-
-        if (strtoupper($idType) === 'S') {
+        if (strtoupper($id_type) === 'S') {
             //check i5_lib option
-            $sequenceName = $objectName;
-            return $this->lastSequenceId($sequenceName);
+            $sequence_name = $object_name;
+            return $this->last_sequence_id($sequence_name);
         }
-
         //returns last identity value for the specified table
         //if (strtoupper($idType) === 'I') {
-        $tableName = $objectName;
-        return $this->fetchOne('SELECT IDENTITY_VAL_LOCAL() from ' . $this->quoteIdentifier($tableName));
+        $table_name = $object_name;
+        return $this->fetch_one('SELECT IDENTITY_VAL_LOCAL() from ' . $this->quote_identifier($table_name));
     }
-
 }

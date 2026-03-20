@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,13 +21,10 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /** @see Zend_Db_Adapter_Pdo_Ibm */
 #require_once 'Zend/Db/Adapter/Pdo/Ibm.php';
-
 /** @see Zend_Db_Statement_Pdo_Ibm */
 #require_once 'Zend/Db/Statement/Pdo/Ibm.php';
-
 /**
  * @category   Zend
  * @package    Zend_Db
@@ -41,7 +38,6 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
      * @var Zend_Db_Adapter_Abstract
      */
     protected $_adapter;
-
     /**
      * Construct the data server class.
      *
@@ -54,145 +50,83 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
     {
         $this->_adapter = $adapter;
     }
-
     /**
      * Returns a list of the tables in the database.
      *
      * @return array
      */
-    public function listTables()
+    public function list_tables()
     {
-        $sql = 'SELECT tabname '
-        . 'FROM systables ';
-
-        return $this->_adapter->fetchCol($sql);
+        $sql = 'SELECT tabname ' . 'FROM systables ';
+        return $this->_adapter->fetch_col($sql);
     }
-
     /**
      * IDS catalog lookup for describe table
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
      */
-    public function describeTable($tableName, $schemaName = null): array
+    public function describe_table($table_name, $schema_name = null): array
     {
         // this is still a work in progress
-
         $sql = 'SELECT DISTINCT t.owner, t.tabname, c.colname, c.colno, c.coltype,
                d.default, c.collength, t.tabid
                FROM syscolumns c
                JOIN systables t ON c.tabid = t.tabid
                LEFT JOIN sysdefaults d ON c.tabid = d.tabid AND c.colno = d.colno
-               WHERE '
-                . $this->_adapter->quoteInto('UPPER(t.tabname) = UPPER(?)', $tableName);
-        if ($schemaName) {
-            $sql .= $this->_adapter->quoteInto(' AND UPPER(t.owner) = UPPER(?)', $schemaName);
+               WHERE ' . $this->_adapter->quote_into('UPPER(t.tabname) = UPPER(?)', $table_name);
+        if ($schema_name) {
+            $sql .= $this->_adapter->quote_into(' AND UPPER(t.owner) = UPPER(?)', $schema_name);
         }
         $sql .= ' ORDER BY c.colno';
-
         $desc = [];
         $stmt = $this->_adapter->query($sql);
-
-        $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-
+        $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
         /**
          * The ordering of columns is defined by the query so we can map
          * to variables to improve readability
          */
-        $tabschema      = 0;
-        $tabname        = 1;
-        $colname        = 2;
-        $colno          = 3;
-        $typename       = 4;
-        $default        = 5;
-        $length         = 6;
-        $tabid          = 7;
-
-        $primaryCols = null;
-
+        $tabschema = 0;
+        $tabname = 1;
+        $colname = 2;
+        $colno = 3;
+        $typename = 4;
+        $default = 5;
+        $length = 6;
+        $tabid = 7;
+        $primary_cols = null;
         foreach ($result as $row) {
             $primary = false;
-            $primaryPosition = null;
-
-            if (!$primaryCols) {
-                $primaryCols = $this->_getPrimaryInfo($row[$tabid]);
+            $primary_position = null;
+            if (!$primary_cols) {
+                $primary_cols = $this->_get_primary_info($row[$tabid]);
             }
-
-            if (array_key_exists($row[$colno], $primaryCols)) {
+            if (array_key_exists($row[$colno], $primary_cols)) {
                 $primary = true;
-                $primaryPosition = $primaryCols[$row[$colno]];
+                $primary_position = $primary_cols[$row[$colno]];
             }
-
             $identity = false;
-            if ($row[$typename] == 6 + 256 ||
-                $row[$typename] == 18 + 256) {
+            if ($row[$typename] == 6 + 256 || $row[$typename] == 18 + 256) {
                 $identity = true;
             }
-
-            $desc[$this->_adapter->foldCase($row[$colname])] =  [
-                'SCHEMA_NAME'       => $this->_adapter->foldCase($row[$tabschema]),
-                'TABLE_NAME'        => $this->_adapter->foldCase($row[$tabname]),
-                'COLUMN_NAME'       => $this->_adapter->foldCase($row[$colname]),
-                'COLUMN_POSITION'   => $row[$colno],
-                'DATA_TYPE'         => $this->_getDataType($row[$typename]),
-                'DEFAULT'           => $row[$default],
-                'NULLABLE'          => !($row[$typename] - 256 >= 0),
-                'LENGTH'            => $row[$length],
-                'SCALE'             => ($row[$typename] == 5 ? $row[$length] & 255 : 0),
-                'PRECISION'         => ($row[$typename] == 5 ? (int)($row[$length] / 256) : 0),
-                'UNSIGNED'          => false,
-                'PRIMARY'           => $primary,
-                'PRIMARY_POSITION'  => $primaryPosition,
-                'IDENTITY'          => $identity,
-            ];
+            $desc[$this->_adapter->fold_case($row[$colname])] = ['SCHEMA_NAME' => $this->_adapter->fold_case($row[$tabschema]), 'TABLE_NAME' => $this->_adapter->fold_case($row[$tabname]), 'COLUMN_NAME' => $this->_adapter->fold_case($row[$colname]), 'COLUMN_POSITION' => $row[$colno], 'DATA_TYPE' => $this->_get_data_type($row[$typename]), 'DEFAULT' => $row[$default], 'NULLABLE' => !($row[$typename] - 256 >= 0), 'LENGTH' => $row[$length], 'SCALE' => $row[$typename] == 5 ? $row[$length] & 255 : 0, 'PRECISION' => $row[$typename] == 5 ? (int) ($row[$length] / 256) : 0, 'UNSIGNED' => false, 'PRIMARY' => $primary, 'PRIMARY_POSITION' => $primary_position, 'IDENTITY' => $identity];
         }
-
         return $desc;
     }
-
     /**
      * Map number representation of a data type
      * to a string
      *
      * @param int $typeNo
      */
-    protected function _getDataType($typeNo): string
+    protected function _get_data_type($type_no): string
     {
-        $typemap = [
-            0       => 'CHAR',
-            1       => 'SMALLINT',
-            2       => 'INTEGER',
-            3       => 'FLOAT',
-            4       => 'SMALLFLOAT',
-            5       => 'DECIMAL',
-            6       => 'SERIAL',
-            7       => 'DATE',
-            8       => 'MONEY',
-            9       => 'NULL',
-            10      => 'DATETIME',
-            11      => 'BYTE',
-            12      => 'TEXT',
-            13      => 'VARCHAR',
-            14      => 'INTERVAL',
-            15      => 'NCHAR',
-            16      => 'NVARCHAR',
-            17      => 'INT8',
-            18      => 'SERIAL8',
-            19      => 'SET',
-            20      => 'MULTISET',
-            21      => 'LIST',
-            22      => 'Unnamed ROW',
-            40      => 'Variable-length opaque type',
-            4118    => 'Named ROW',
-        ];
-
-        if ($typeNo - 256 >= 0) {
-            $typeNo = $typeNo - 256;
+        $typemap = [0 => 'CHAR', 1 => 'SMALLINT', 2 => 'INTEGER', 3 => 'FLOAT', 4 => 'SMALLFLOAT', 5 => 'DECIMAL', 6 => 'SERIAL', 7 => 'DATE', 8 => 'MONEY', 9 => 'NULL', 10 => 'DATETIME', 11 => 'BYTE', 12 => 'TEXT', 13 => 'VARCHAR', 14 => 'INTERVAL', 15 => 'NCHAR', 16 => 'NVARCHAR', 17 => 'INT8', 18 => 'SERIAL8', 19 => 'SET', 20 => 'MULTISET', 21 => 'LIST', 22 => 'Unnamed ROW', 40 => 'Variable-length opaque type', 4118 => 'Named ROW'];
+        if ($type_no - 256 >= 0) {
+            $type_no = $type_no - 256;
         }
-
-        return $typemap[$typeNo];
+        return $typemap[$type_no];
     }
-
     /**
      * Helper method to retrieve primary key column
      * and column location
@@ -200,7 +134,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
      * @param int $tabid
      * @return array
      */
-    protected function _getPrimaryInfo($tabid)
+    protected function _get_primary_info($tabid)
     {
         $sql = 'SELECT i.part1, i.part2, i.part3, i.part4, i.part5, i.part6,
                 i.part7, i.part8, i.part9, i.part10, i.part11, i.part12,
@@ -208,12 +142,9 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
                 FROM sysindexes i
                 JOIN sysconstraints c ON c.idxname = i.idxname
                 WHERE i.tabid = ' . $tabid . " AND c.constrtype = 'P'";
-
         $stmt = $this->_adapter->query($sql);
-        $results = $stmt->fetchAll();
-
+        $results = $stmt->fetch_all();
         $cols = [];
-
         // this should return only 1 row
         // unless there is no primary key,
         // in which case, the empty array is returned
@@ -222,7 +153,6 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
         } else {
             return $cols;
         }
-
         $position = 0;
         foreach ($row as $colno) {
             $position++;
@@ -232,7 +162,6 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
             $cols[$colno] = $position;
         }
     }
-
     /**
      * Adds an IDS-specific LIMIT clause to the SELECT statement.
      *
@@ -248,7 +177,7 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
         if ($count < 0) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument count={$count} is not valid");
         }
         if ($count == 0) {
             $limit_sql = str_ireplace('SELECT', 'SELECT * FROM (SELECT', $sql);
@@ -258,40 +187,36 @@ class Zend_Db_Adapter_Pdo_Ibm_Ids
             if ($offset < 0) {
                 /** @see Zend_Db_Adapter_Exception */
                 #require_once 'Zend/Db/Adapter/Exception.php';
-                throw new Zend_Db_Adapter_Exception("LIMIT argument offset=$offset is not valid");
+                throw new Zend_Db_Adapter_Exception("LIMIT argument offset={$offset} is not valid");
             }
             if ($offset == 0) {
-                $limit_sql = str_ireplace('SELECT', "SELECT FIRST $count", $sql);
+                $limit_sql = str_ireplace('SELECT', "SELECT FIRST {$count}", $sql);
             } else {
-                $limit_sql = str_ireplace('SELECT', "SELECT SKIP $offset LIMIT $count", $sql);
+                $limit_sql = str_ireplace('SELECT', "SELECT SKIP {$offset} LIMIT {$count}", $sql);
             }
         }
         return $limit_sql;
     }
-
     /**
      * IDS-specific last sequence id
      *
      * @param string $sequenceName
      * @return integer
      */
-    public function lastSequenceId($sequenceName)
+    public function last_sequence_id($sequence_name)
     {
-        $sql = 'SELECT '.$this->_adapter->quoteIdentifier($sequenceName).'.CURRVAL FROM '
-               .'systables WHERE tabid = 1';
-        return $this->_adapter->fetchOne($sql);
+        $sql = 'SELECT ' . $this->_adapter->quote_identifier($sequence_name) . '.CURRVAL FROM ' . 'systables WHERE tabid = 1';
+        return $this->_adapter->fetch_one($sql);
     }
-
     /**
-    * IDS-specific sequence id value
-    *
-    *  @param string $sequenceName
-    *  @return integer
-    */
-    public function nextSequenceId($sequenceName)
+     * IDS-specific sequence id value
+     *
+     *  @param string $sequenceName
+     *  @return integer
+     */
+    public function next_sequence_id($sequence_name)
     {
-        $sql = 'SELECT '.$this->_adapter->quoteIdentifier($sequenceName).'.NEXTVAL FROM '
-               .'systables WHERE tabid = 1';
-        return $this->_adapter->fetchOne($sql);
+        $sql = 'SELECT ' . $this->_adapter->quote_identifier($sequence_name) . '.NEXTVAL FROM ' . 'systables WHERE tabid = 1';
+        return $this->_adapter->fetch_one($sql);
     }
 }

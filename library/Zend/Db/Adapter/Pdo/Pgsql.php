@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,12 +21,10 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /**
  * @see Zend_Db_Adapter_Pdo_Abstract
  */
 #require_once 'Zend/Db/Adapter/Pdo/Abstract.php';
-
 /**
  * Class for connecting to PostgreSQL databases and performing common operations.
  *
@@ -43,8 +41,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var string
      */
-    protected $_pdoType = 'pgsql';
-
+    protected $_pdo_type = 'pgsql';
     /**
      * Keys are UPPERCASE SQL datatypes or the constants
      * Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE, or Zend_Db::FLOAT_TYPE.
@@ -56,21 +53,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      *
      * @var array Associative array of datatypes to values 0, 1, or 2.
      */
-    protected $_numericDataTypes = [
-        Zend_Db::INT_TYPE    => Zend_Db::INT_TYPE,
-        Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE,
-        Zend_Db::FLOAT_TYPE  => Zend_Db::FLOAT_TYPE,
-        'INTEGER'            => Zend_Db::INT_TYPE,
-        'SERIAL'             => Zend_Db::INT_TYPE,
-        'SMALLINT'           => Zend_Db::INT_TYPE,
-        'BIGINT'             => Zend_Db::BIGINT_TYPE,
-        'BIGSERIAL'          => Zend_Db::BIGINT_TYPE,
-        'DECIMAL'            => Zend_Db::FLOAT_TYPE,
-        'DOUBLE PRECISION'   => Zend_Db::FLOAT_TYPE,
-        'NUMERIC'            => Zend_Db::FLOAT_TYPE,
-        'REAL'               => Zend_Db::FLOAT_TYPE,
-    ];
-
+    protected $_numeric_data_types = [Zend_Db::INT_TYPE => Zend_Db::INT_TYPE, Zend_Db::BIGINT_TYPE => Zend_Db::BIGINT_TYPE, Zend_Db::FLOAT_TYPE => Zend_Db::FLOAT_TYPE, 'INTEGER' => Zend_Db::INT_TYPE, 'SERIAL' => Zend_Db::INT_TYPE, 'SMALLINT' => Zend_Db::INT_TYPE, 'BIGINT' => Zend_Db::BIGINT_TYPE, 'BIGSERIAL' => Zend_Db::BIGINT_TYPE, 'DECIMAL' => Zend_Db::FLOAT_TYPE, 'DOUBLE PRECISION' => Zend_Db::FLOAT_TYPE, 'NUMERIC' => Zend_Db::FLOAT_TYPE, 'REAL' => Zend_Db::FLOAT_TYPE];
     /**
      * Creates a PDO object and connects to the database.
      *
@@ -82,39 +65,23 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
         if ($this->_connection) {
             return;
         }
-
         parent::_connect();
-
         if (!empty($this->_config['charset'])) {
             $sql = "SET NAMES '" . $this->_config['charset'] . "'";
             $this->_connection->exec($sql);
         }
     }
-
     /**
      * Returns a list of the tables in the database.
      *
      * @return array
      */
-    public function listTables()
+    public function list_tables()
     {
         // @todo use a better query with joins instead of subqueries
-        $sql = 'SELECT c.relname AS table_name '
-             . 'FROM pg_class c, pg_user u '
-             . "WHERE c.relowner = u.usesysid AND c.relkind = 'r' "
-             . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) '
-             . "AND c.relname !~ '^(pg_|sql_)' "
-             . 'UNION '
-             . 'SELECT c.relname AS table_name '
-             . 'FROM pg_class c '
-             . "WHERE c.relkind = 'r' "
-             . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) '
-             . 'AND NOT EXISTS (SELECT 1 FROM pg_user WHERE usesysid = c.relowner) '
-             . "AND c.relname !~ '^pg_'";
-
-        return $this->fetchCol($sql);
+        $sql = 'SELECT c.relname AS table_name ' . 'FROM pg_class c, pg_user u ' . "WHERE c.relowner = u.usesysid AND c.relkind = 'r' " . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) ' . "AND c.relname !~ '^(pg_|sql_)' " . 'UNION ' . 'SELECT c.relname AS table_name ' . 'FROM pg_class c ' . "WHERE c.relkind = 'r' " . 'AND NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname = c.relname) ' . 'AND NOT EXISTS (SELECT 1 FROM pg_user WHERE usesysid = c.relowner) ' . "AND c.relname !~ '^pg_'";
+        return $this->fetch_col($sql);
     }
-
     /**
      * Returns the column descriptions for a table.
      *
@@ -144,92 +111,71 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * @param  string $tableName
      * @param  string $schemaName OPTIONAL
      */
-    public function describeTable($tableName, $schemaName = null): array
+    public function describe_table($table_name, $schema_name = null): array
     {
-        $sql = "SELECT
-                a.attnum,
-                n.nspname,
-                c.relname,
-                a.attname AS colname,
-                t.typname AS type,
-                a.atttypmod,
-                FORMAT_TYPE(a.atttypid, a.atttypmod) AS complete_type,
-                d.adsrc AS default_value,
-                a.attnotnull AS notnull,
-                a.attlen AS length,
-                co.contype,
-                ARRAY_TO_STRING(co.conkey, ',') AS conkey
-            FROM pg_attribute AS a
-                JOIN pg_class AS c ON a.attrelid = c.oid
-                JOIN pg_namespace AS n ON c.relnamespace = n.oid
-                JOIN pg_type AS t ON a.atttypid = t.oid
-                LEFT OUTER JOIN pg_constraint AS co ON (co.conrelid = c.oid
-                    AND a.attnum = ANY(co.conkey) AND co.contype = 'p')
-                LEFT OUTER JOIN pg_attrdef AS d ON d.adrelid = c.oid AND d.adnum = a.attnum
-            WHERE a.attnum > 0 AND c.relname = ".$this->quote($tableName);
-        if ($schemaName) {
-            $sql .= ' AND n.nspname = '.$this->quote($schemaName);
+        $sql = "SELECT\n                a.attnum,\n                n.nspname,\n                c.relname,\n                a.attname AS colname,\n                t.typname AS type,\n                a.atttypmod,\n                FORMAT_TYPE(a.atttypid, a.atttypmod) AS complete_type,\n                d.adsrc AS default_value,\n                a.attnotnull AS notnull,\n                a.attlen AS length,\n                co.contype,\n                ARRAY_TO_STRING(co.conkey, ',') AS conkey\n            FROM pg_attribute AS a\n                JOIN pg_class AS c ON a.attrelid = c.oid\n                JOIN pg_namespace AS n ON c.relnamespace = n.oid\n                JOIN pg_type AS t ON a.atttypid = t.oid\n                LEFT OUTER JOIN pg_constraint AS co ON (co.conrelid = c.oid\n                    AND a.attnum = ANY(co.conkey) AND co.contype = 'p')\n                LEFT OUTER JOIN pg_attrdef AS d ON d.adrelid = c.oid AND d.adnum = a.attnum\n            WHERE a.attnum > 0 AND c.relname = " . $this->quote($table_name);
+        if ($schema_name) {
+            $sql .= ' AND n.nspname = ' . $this->quote($schema_name);
         }
         $sql .= ' ORDER BY a.attnum';
-
         $stmt = $this->query($sql);
-
         // Use FETCH_NUM so we are not dependent on the CASE attribute of the PDO connection
-        $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-
-        $attnum        = 0;
-        $nspname       = 1;
-        $relname       = 2;
-        $colname       = 3;
-        $type          = 4;
+        $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
+        $attnum = 0;
+        $nspname = 1;
+        $relname = 2;
+        $colname = 3;
+        $type = 4;
         $complete_type = 6;
         $default_value = 7;
-        $notnull       = 8;
-        $length        = 9;
-        $contype       = 10;
-        $conkey        = 11;
-
+        $notnull = 8;
+        $length = 9;
+        $contype = 10;
+        $conkey = 11;
         $desc = [];
         foreach ($result as $row) {
-            $defaultValue = $row[$default_value];
+            $default_value = $row[$default_value];
             if ($row[$type] == 'varchar' || $row[$type] == 'bpchar') {
                 if (preg_match('/character(?: varying)?(?:\((\d+)\))?/', $row[$complete_type], $matches)) {
                     if (isset($matches[1])) {
                         $row[$length] = $matches[1];
                     } else {
-                        $row[$length] = null; // unlimited
+                        $row[$length] = null;
+                        // unlimited
                     }
                 }
-                if (preg_match("/^'(.*?)'::(?:character varying|bpchar)$/", $defaultValue, $matches)) {
-                    $defaultValue = $matches[1];
+                if (preg_match("/^'(.*?)'::(?:character varying|bpchar)\$/", $default_value, $matches)) {
+                    $default_value = $matches[1];
                 }
             }
-            list($primary, $primaryPosition, $identity) = [false, null, false];
+            list($primary, $primary_position, $identity) = [false, null, false];
             if ($row[$contype] == 'p') {
                 $primary = true;
-                $primaryPosition = array_search($row[$attnum], explode(',', $row[$conkey])) + 1;
-                $identity = (bool) (preg_match('/^nextval/', $row[$default_value]));
+                $primary_position = array_search($row[$attnum], explode(',', $row[$conkey])) + 1;
+                $identity = (bool) preg_match('/^nextval/', $row[$default_value]);
             }
-            $desc[$this->foldCase($row[$colname])] = [
-                'SCHEMA_NAME'      => $this->foldCase($row[$nspname]),
-                'TABLE_NAME'       => $this->foldCase($row[$relname]),
-                'COLUMN_NAME'      => $this->foldCase($row[$colname]),
-                'COLUMN_POSITION'  => $row[$attnum],
-                'DATA_TYPE'        => $row[$type],
-                'DEFAULT'          => $defaultValue,
-                'NULLABLE'         => $row[$notnull] != 't',
-                'LENGTH'           => $row[$length],
-                'SCALE'            => null, // @todo
-                'PRECISION'        => null, // @todo
-                'UNSIGNED'         => null, // @todo
-                'PRIMARY'          => $primary,
-                'PRIMARY_POSITION' => $primaryPosition,
-                'IDENTITY'         => $identity,
+            $desc[$this->fold_case($row[$colname])] = [
+                'SCHEMA_NAME' => $this->fold_case($row[$nspname]),
+                'TABLE_NAME' => $this->fold_case($row[$relname]),
+                'COLUMN_NAME' => $this->fold_case($row[$colname]),
+                'COLUMN_POSITION' => $row[$attnum],
+                'DATA_TYPE' => $row[$type],
+                'DEFAULT' => $default_value,
+                'NULLABLE' => $row[$notnull] != 't',
+                'LENGTH' => $row[$length],
+                'SCALE' => null,
+                // @todo
+                'PRECISION' => null,
+                // @todo
+                'UNSIGNED' => null,
+                // @todo
+                'PRIMARY' => $primary,
+                'PRIMARY_POSITION' => $primary_position,
+                'IDENTITY' => $identity,
             ];
         }
         return $desc;
     }
-
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
      *
@@ -245,26 +191,22 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
              * @see Zend_Db_Adapter_Exception
              */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument count={$count} is not valid");
         }
-
         $offset = intval($offset);
         if ($offset < 0) {
             /**
              * @see Zend_Db_Adapter_Exception
              */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument offset=$offset is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument offset={$offset} is not valid");
         }
-
-        $sql .= " LIMIT $count";
+        $sql .= " LIMIT {$count}";
         if ($offset > 0) {
-            $sql .= " OFFSET $offset";
+            $sql .= " OFFSET {$offset}";
         }
-
         return $sql;
     }
-
     /**
      * Return the most recent value from the specified sequence in the database.
      * This is supported only on RDBMS brands that support sequences
@@ -273,15 +215,12 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $sequenceName
      * @return string
      */
-    public function lastSequenceId($sequenceName)
+    public function last_sequence_id($sequence_name)
     {
         $this->_connect();
-        $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        return $this->fetchOne('SELECT CURRVAL('
-               . $this->quote($this->quoteIdentifier($sequenceName, true))
-               . ')');
+        $sequence_name = str_replace($this->get_quote_identifier_symbol(), '', (string) $sequence_name);
+        return $this->fetch_one('SELECT CURRVAL(' . $this->quote($this->quote_identifier($sequence_name, true)) . ')');
     }
-
     /**
      * Generate a new value from the specified sequence in the database, and return it.
      * This is supported only on RDBMS brands that support sequences
@@ -290,15 +229,12 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $sequenceName
      * @return string
      */
-    public function nextSequenceId($sequenceName)
+    public function next_sequence_id($sequence_name)
     {
         $this->_connect();
-        $sequenceName = str_replace($this->getQuoteIdentifierSymbol(), '', (string) $sequenceName);
-        return $this->fetchOne('SELECT NEXTVAL('
-               . $this->quote($this->quoteIdentifier($sequenceName, true))
-               . ')');
+        $sequence_name = str_replace($this->get_quote_identifier_symbol(), '', (string) $sequence_name);
+        return $this->fetch_one('SELECT NEXTVAL(' . $this->quote($this->quote_identifier($sequence_name, true)) . ')');
     }
-
     /**
      * Gets the last ID generated automatically by an IDENTITY/AUTOINCREMENT column.
      *
@@ -313,17 +249,16 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * @param string $primaryKey  OPTIONAL Name of primary key column.
      * @return string
      */
-    public function lastInsertId($tableName = null, $primaryKey = null)
+    public function last_insert_id($table_name = null, $primary_key = null)
     {
-        if ($tableName !== null) {
-            $sequenceName = $tableName;
-            if ($primaryKey) {
-                $sequenceName .= "_$primaryKey";
+        if ($table_name !== null) {
+            $sequence_name = $table_name;
+            if ($primary_key) {
+                $sequence_name .= "_{$primary_key}";
             }
-            $sequenceName .= '_seq';
-            return $this->lastSequenceId($sequenceName);
+            $sequence_name .= '_seq';
+            return $this->last_sequence_id($sequence_name);
         }
-        return $this->_connection->lastInsertId($tableName);
+        return $this->_connection->last_insert_id($table_name);
     }
-
 }

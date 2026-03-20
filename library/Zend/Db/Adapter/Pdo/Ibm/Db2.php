@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
 /**
  * Zend Framework
  *
@@ -21,13 +21,10 @@ declare(strict_types=1);
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-
 /** @see Zend_Db_Adapter_Pdo_Ibm */
 #require_once 'Zend/Db/Adapter/Pdo/Ibm.php';
-
 /** @see Zend_Db_Statement_Pdo_Ibm */
 #require_once 'Zend/Db/Statement/Pdo/Ibm.php';
-
 /**
  * @category   Zend
  * @package    Zend_Db
@@ -41,7 +38,6 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
      * @var Zend_Db_Adapter_Abstract
      */
     protected $_adapter;
-
     /**
      * Construct the data server class.
      *
@@ -54,105 +50,68 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
     {
         $this->_adapter = $adapter;
     }
-
     /**
      * Returns a list of the tables in the database.
      *
      * @return array
      */
-    public function listTables()
+    public function list_tables()
     {
-        $sql = 'SELECT tabname '
-        . 'FROM SYSCAT.TABLES ';
-        return $this->_adapter->fetchCol($sql);
+        $sql = 'SELECT tabname ' . 'FROM SYSCAT.TABLES ';
+        return $this->_adapter->fetch_col($sql);
     }
-
     /**
      * DB2 catalog lookup for describe table
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
      */
-    public function describeTable($tableName, $schemaName = null): array
+    public function describe_table($table_name, $schema_name = null): array
     {
-        $sql = "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,
-                c.typename, c.default, c.nulls, c.length, c.scale,
-                c.identity, tc.type AS tabconsttype, k.colseq
-                FROM syscat.columns c
-                LEFT JOIN (syscat.keycoluse k JOIN syscat.tabconst tc
-                 ON (k.tabschema = tc.tabschema
-                   AND k.tabname = tc.tabname
-                   AND tc.type = 'P'))
-                 ON (c.tabschema = k.tabschema
-                 AND c.tabname = k.tabname
-                 AND c.colname = k.colname)
-            WHERE "
-            . $this->_adapter->quoteInto('UPPER(c.tabname) = UPPER(?)', $tableName);
-        if ($schemaName) {
-            $sql .= $this->_adapter->quoteInto(' AND UPPER(c.tabschema) = UPPER(?)', $schemaName);
+        $sql = "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,\n                c.typename, c.default, c.nulls, c.length, c.scale,\n                c.identity, tc.type AS tabconsttype, k.colseq\n                FROM syscat.columns c\n                LEFT JOIN (syscat.keycoluse k JOIN syscat.tabconst tc\n                 ON (k.tabschema = tc.tabschema\n                   AND k.tabname = tc.tabname\n                   AND tc.type = 'P'))\n                 ON (c.tabschema = k.tabschema\n                 AND c.tabname = k.tabname\n                 AND c.colname = k.colname)\n            WHERE " . $this->_adapter->quote_into('UPPER(c.tabname) = UPPER(?)', $table_name);
+        if ($schema_name) {
+            $sql .= $this->_adapter->quote_into(' AND UPPER(c.tabschema) = UPPER(?)', $schema_name);
         }
         $sql .= ' ORDER BY c.colno';
-
         $desc = [];
         $stmt = $this->_adapter->query($sql);
-
         /**
          * To avoid case issues, fetch using FETCH_NUM
          */
-        $result = $stmt->fetchAll(Zend_Db::FETCH_NUM);
-
+        $result = $stmt->fetch_all(Zend_Db::FETCH_NUM);
         /**
          * The ordering of columns is defined by the query so we can map
          * to variables to improve readability
          */
-        $tabschema      = 0;
-        $tabname        = 1;
-        $colname        = 2;
-        $colno          = 3;
-        $typename       = 4;
-        $default        = 5;
-        $nulls          = 6;
-        $length         = 7;
-        $scale          = 8;
-        $identityCol    = 9;
-        $tabconstype    = 10;
-        $colseq         = 11;
-
+        $tabschema = 0;
+        $tabname = 1;
+        $colname = 2;
+        $colno = 3;
+        $typename = 4;
+        $default = 5;
+        $nulls = 6;
+        $length = 7;
+        $scale = 8;
+        $identity_col = 9;
+        $tabconstype = 10;
+        $colseq = 11;
         foreach ($result as $row) {
-            list($primary, $primaryPosition, $identity) = [false, null, false];
+            list($primary, $primary_position, $identity) = [false, null, false];
             if ($row[$tabconstype] == 'P') {
                 $primary = true;
-                $primaryPosition = $row[$colseq];
+                $primary_position = $row[$colseq];
             }
             /**
              * In IBM DB2, an column can be IDENTITY
              * even if it is not part of the PRIMARY KEY.
              */
-            if ($row[$identityCol] == 'Y') {
+            if ($row[$identity_col] == 'Y') {
                 $identity = true;
             }
-
-            $desc[$this->_adapter->foldCase($row[$colname])] = [
-            'SCHEMA_NAME'      => $this->_adapter->foldCase($row[$tabschema]),
-            'TABLE_NAME'       => $this->_adapter->foldCase($row[$tabname]),
-            'COLUMN_NAME'      => $this->_adapter->foldCase($row[$colname]),
-            'COLUMN_POSITION'  => $row[$colno] + 1,
-            'DATA_TYPE'        => $row[$typename],
-            'DEFAULT'          => $row[$default],
-            'NULLABLE'         => $row[$nulls] == 'Y',
-            'LENGTH'           => $row[$length],
-            'SCALE'            => $row[$scale],
-            'PRECISION'        => ($row[$typename] == 'DECIMAL' ? $row[$length] : 0),
-            'UNSIGNED'         => false,
-            'PRIMARY'          => $primary,
-            'PRIMARY_POSITION' => $primaryPosition,
-            'IDENTITY'         => $identity,
-            ];
+            $desc[$this->_adapter->fold_case($row[$colname])] = ['SCHEMA_NAME' => $this->_adapter->fold_case($row[$tabschema]), 'TABLE_NAME' => $this->_adapter->fold_case($row[$tabname]), 'COLUMN_NAME' => $this->_adapter->fold_case($row[$colname]), 'COLUMN_POSITION' => $row[$colno] + 1, 'DATA_TYPE' => $row[$typename], 'DEFAULT' => $row[$default], 'NULLABLE' => $row[$nulls] == 'Y', 'LENGTH' => $row[$length], 'SCALE' => $row[$scale], 'PRECISION' => $row[$typename] == 'DECIMAL' ? $row[$length] : 0, 'UNSIGNED' => false, 'PRIMARY' => $primary, 'PRIMARY_POSITION' => $primary_position, 'IDENTITY' => $identity];
         }
-
         return $desc;
     }
-
     /**
      * Adds a DB2-specific LIMIT clause to the SELECT statement.
      *
@@ -166,16 +125,16 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
         if ($count < 0) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument count=$count is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument count={$count} is not valid");
         }
         $offset = intval($offset);
         if ($offset < 0) {
             /** @see Zend_Db_Adapter_Exception */
             #require_once 'Zend/Db/Adapter/Exception.php';
-            throw new Zend_Db_Adapter_Exception("LIMIT argument offset=$offset is not valid");
+            throw new Zend_Db_Adapter_Exception("LIMIT argument offset={$offset} is not valid");
         }
         if ($offset == 0 && $count > 0) {
-            return $sql . " FETCH FIRST $count ROWS ONLY";
+            return $sql . " FETCH FIRST {$count} ROWS ONLY";
         }
         /**
          * DB2 does not implement the LIMIT clause as some RDBMS do.
@@ -193,28 +152,26 @@ class Zend_Db_Adapter_Pdo_Ibm_Db2
               WHERE z2.zend_db_rownum BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $count);
         return $limit_sql;
     }
-
     /**
      * DB2-specific last sequence id
      *
      * @param string $sequenceName
      * @return integer
      */
-    public function lastSequenceId($sequenceName)
+    public function last_sequence_id($sequence_name)
     {
-        $sql = 'SELECT PREVVAL FOR '.$this->_adapter->quoteIdentifier($sequenceName).' AS VAL FROM SYSIBM.SYSDUMMY1';
-        return $this->_adapter->fetchOne($sql);
+        $sql = 'SELECT PREVVAL FOR ' . $this->_adapter->quote_identifier($sequence_name) . ' AS VAL FROM SYSIBM.SYSDUMMY1';
+        return $this->_adapter->fetch_one($sql);
     }
-
     /**
      * DB2-specific sequence id value
      *
      *  @param string $sequenceName
      *  @return integer
      */
-    public function nextSequenceId($sequenceName)
+    public function next_sequence_id($sequence_name)
     {
-        $sql = 'SELECT NEXTVAL FOR '.$this->_adapter->quoteIdentifier($sequenceName).' AS VAL FROM SYSIBM.SYSDUMMY1';
-        return $this->_adapter->fetchOne($sql);
+        $sql = 'SELECT NEXTVAL FOR ' . $this->_adapter->quote_identifier($sequence_name) . ' AS VAL FROM SYSIBM.SYSDUMMY1';
+        return $this->_adapter->fetch_one($sql);
     }
 }
