@@ -56,6 +56,21 @@ class FactoryTest extends TestCase
     public function testUnknownAdapterThrows()
     {
         $this->expectException(\Zend_Exception::class);
-        @Zend_Db::factory('No_Such_Driver', array('dbname' => 'x'));
+        set_error_handler(function ($severity, $message, $file) {
+            if ($severity === E_WARNING
+                && strpos($file, 'Zend/Loader.php') !== false
+                && strpos($message, 'include_once') !== false
+                && strpos($message, 'Zend/Db/Adapter/No/Such/Driver.php') !== false
+            ) {
+                return true;
+            }
+
+            return false;
+        });
+        try {
+            Zend_Db::factory('No_Such_Driver', array('dbname' => 'x'));
+        } finally {
+            restore_error_handler();
+        }
     }
 }

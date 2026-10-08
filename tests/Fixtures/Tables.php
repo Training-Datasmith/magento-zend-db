@@ -49,3 +49,8 @@ class BugsCompositePrimary extends Bugs
 {
     protected $_primary = array('id', 'name');
 }
+
+class BugsIdOnlyPrimary extends BugsCompositePrimary
+{
+    protected $_primary = array('id');
+}

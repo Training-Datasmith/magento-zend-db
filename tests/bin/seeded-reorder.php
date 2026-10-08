@@ -25,7 +25,7 @@ foreach ($leaves as $test) {
 }
 
 $runner = new PHPUnit\TextUI\TestRunner();
-$result = $runner->doRun($shuffled, array(), true);
+$result = $runner->doRun($shuffled, array(), false);
 
 $ran = $result->count();
 if (!$result->wasSuccessful()) {

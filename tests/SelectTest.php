@@ -85,7 +85,9 @@ class SelectTest extends TestCase
     public function testDistinctAndUnionExecute()
     {
         $d = $this->db->select()->from('bugs', array('status'))->distinct();
-        $this->assertLessThanOrEqual(3, count($this->db->fetchCol($d)));
+        $statuses = $this->db->fetchCol($d);
+        sort($statuses);
+        $this->assertSame(array('s', 't'), $statuses);
         $a = $this->db->select()->from('bugs', array('name'))->where('name = ?', 'a');
         $b = $this->db->select()->from('bugs', array('name'))->where('name = ?', 'c');
         $u = $this->db->select()->union(array($a, $b));

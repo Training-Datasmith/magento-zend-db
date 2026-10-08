@@ -4,6 +4,7 @@ namespace ZendDbTest\Table;
 
 use ZendDbTest\Fixtures\Bugs;
 use ZendDbTest\Fixtures\BugsCompositePrimary;
+use ZendDbTest\Fixtures\BugsIdOnlyPrimary;
 use ZendDbTest\Fixtures\Codes;
 use ZendDbTest\TestCase;
 use Zend_Db_Table_Abstract;
@@ -58,7 +59,9 @@ class RowReconnectTest extends TestCase
         $composite = new BugsCompositePrimary();
         $composite->insert(array('name' => 'n', 'status' => 's', 'score' => 1));
         $row = $composite->fetchRow();
+        $idOnly = new BugsIdOnlyPrimary();
         $this->expectException(Zend_Db_Table_Row_Exception::class);
-        $row->setTable(new Bugs());
+        $this->expectExceptionMessage('does not have the same primary key');
+        $row->setTable($idOnly);
     }
 }
