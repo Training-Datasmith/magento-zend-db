@@ -896,7 +896,7 @@ abstract class Zend_Db_Table_Abstract
         }
 
         $cols = $this->_getCols();
-        if (! array_intersect((array) $this->_primary, $cols) == (array) $this->_primary) {
+        if (array_intersect((array) $this->_primary, $cols) != (array) $this->_primary) {
             #require_once 'Zend/Db/Table/Exception.php';
             throw new Zend_Db_Table_Exception("Primary key column(s) ("
                 . implode(',', (array) $this->_primary)
@@ -1310,7 +1310,7 @@ abstract class Zend_Db_Table_Abstract
             if (is_array($keyValues) || $keyValues instanceof \Countable) {
                 $keyValuesCount = count($keyValues);
             } else {
-                if (null == $keyValues) {
+                if ($keyValues === null) {
                     $keyValuesCount = 0;
                 } else {
                     $keyValuesCount = 1;
@@ -1603,7 +1603,7 @@ abstract class Zend_Db_Table_Abstract
      * @throws Zend_Db_Table_Row_Exception
      * @return Zend_Db_Table_Abstract
      */
-    public static function getTableFromString($tableName, ?Zend_Db_Table_Abstract $referenceTable = null)
+    public static function getTableFromString($tableName, Zend_Db_Table_Abstract $referenceTable = null)
     {
         if ($referenceTable instanceof Zend_Db_Table_Abstract) {
             $tableDefinition = $referenceTable->getDefinition();

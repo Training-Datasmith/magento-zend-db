@@ -25,5 +25,17 @@
         "branch-alias": {
             "dev-main": "1.16.x-dev"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "6.5.14"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZendDbTest\\": "tests/"
+        },
+        "classmap": [
+            "tests/Fixtures/Tables.php",
+            "tests/Adapter/NotAnAdapter.php"
+        ]
     }
 }
